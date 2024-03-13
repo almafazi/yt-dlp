@@ -322,6 +322,16 @@ class TikTokBaseIE(InfoExtractor):
         else:
             music_track, music_author = music_info.get('title'), traverse_obj(music_info, ('author', {str}))
 
+        imageLinks = []
+        if 'image_post_info' in aweme_detail:
+            images = aweme_detail['image_post_info'].get('images')
+            for i in range(len(images)):
+                sel = images[i]["display_image"]["url_list"]
+                sel = [p for p in sel if ".jpeg?" in p]
+                imageLinks.append({"url": sel[0]})
+        else:
+            imageLinks = []
+        
         return {
             'id': aweme_id,
             **traverse_obj(aweme_detail, {
@@ -343,7 +353,9 @@ class TikTokBaseIE(InfoExtractor):
                 'channel_id': ('sec_uid', {str}),
             }),
             'uploader_url': user_url,
+            'photos': imageLinks,
             'track': music_track,
+            'audio': traverse_obj(music_info, 'play_url', 'uri'),
             'album': str_or_none(music_info.get('album')) or None,
             'artists': re.split(r'(?:, | & )', music_author) if music_author else None,
             'formats': formats,
@@ -433,7 +445,7 @@ class TikTokBaseIE(InfoExtractor):
 
 
 class TikTokIE(TikTokBaseIE):
-    _VALID_URL = r'https?://www\.tiktok\.com/(?:embed|@(?P<user_id>[\w\.-]+)?/video)/(?P<id>\d+)'
+    _VALID_URL = r'https?://www\.tiktok\.com/(?:embed|@(?P<user_id>[\w\.-]+)?/(?:video|photo))/(?P<id>\d+)'
     _EMBED_REGEX = [rf'<(?:script|iframe)[^>]+\bsrc=(["\'])(?P<url>{_VALID_URL})']
 
     _TESTS = [{

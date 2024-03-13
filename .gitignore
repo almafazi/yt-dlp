@@ -3,7 +3,7 @@
 cookies
 *cookies.txt
 .netrc
-
+ttdl/*
 # Downloaded
 *.annotations.xml
 *.aria2
