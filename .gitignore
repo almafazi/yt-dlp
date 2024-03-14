@@ -4,6 +4,8 @@ cookies
 *cookies.txt
 .netrc
 ttdl/*
+node_modules
+converted/*
 # Downloaded
 *.annotations.xml
 *.aria2
