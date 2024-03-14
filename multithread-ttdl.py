@@ -3,11 +3,12 @@ import yt_dlp
 from flask import Flask, request, jsonify, render_template
 import base64
 import multiprocessing
+from flask_cors import CORS, cross_origin
 
 import concurrent.futures
 
 app = Flask(__name__)
-
+cors = CORS(app)
 
 def nFormatter(num):
     magnitude = 0
@@ -73,6 +74,8 @@ def heavy_function(url, menu, download_url):
         )
         selected_format = sorted_formats[0] if sorted_formats else None
         wm_video_url = selected_format.get("url") if selected_format else None
+        if(wm_video_url == None):
+            wm_video_url = formats[0].get('url')
 
         selected_format = max(
             (f for f in formats if "watermarked" not in f.get("format_note", "")),
@@ -80,7 +83,9 @@ def heavy_function(url, menu, download_url):
             default=None,
         )
         nwm_video_url = selected_format.get("url") if selected_format else None
-
+        if(nwm_video_url == None):
+            nwm_video_url = formats[1].get('url')
+            
         download_data = {
             "wm_video_url": download_url
             + "?link="
@@ -102,11 +107,20 @@ def heavy_function(url, menu, download_url):
         return {"info": info, "download_data": download_data}
 
 
-@app.route("/tiktok")
+@app.route('/tiktok', methods = ['POST'])
+@cross_origin()
 def handle_request():
-    url = request.args.get("url")
-    menu = request.args.get("menu")
-    download_url = request.args.get("download_url")
+    request_data = json.loads(request.data)
+
+    url = request_data.get('url')
+    menu = request_data.get('menu')
+    download_url = request_data.get('download_url')
+
+    if not url or not download_url:
+        return jsonify({
+            'error': 'Missing required parameters.'
+        }), 400
+
     num_cores = multiprocessing.cpu_count()
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_cores) as executor:

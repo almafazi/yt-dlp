@@ -434,6 +434,9 @@ class TikTokBaseIE(InfoExtractor):
                 'album': ('album', {str}, {lambda x: x or None}),
                 'artists': ('authorName', {str}, {lambda x: [x] if x else None}),
             }),
+            'audio': {
+                'uri': traverse_obj(music_info, 'music', 'playUrl')
+            },
             'channel_id': channel_id,
             'uploader_url': user_url,
             'formats': formats,
