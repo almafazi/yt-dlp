@@ -28,7 +28,10 @@ def get_tiktok_info():
             'error': 'Missing required parameters.'
         }), 400
 
-    ydl_opts = {'quiet': True,}
+    ydl_opts = {
+        'quiet': True,
+        "extractor_args": {"tiktok": {"api_hostname": ['api22-normal-c-useast2a.tiktokv.com']}},
+    }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
