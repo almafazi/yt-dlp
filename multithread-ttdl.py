@@ -20,7 +20,7 @@ def nFormatter(num):
 
 def heavy_function(url, menu, download_url):
 
-    ydl_opts = {"quiet": True}
+    ydl_opts = {"quiet": True, "api_hostname": "api22-normal-c-useast2a.tiktokv.com"}
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
     # return jsonify(info)
