@@ -119,7 +119,7 @@ function generateDownloadUrl(outputPath, directoryPath) {
 
 async function convertToMp3(youtubeUrl, outputPath) {
     return new Promise((resolve, reject) => {
-        const proxyUrl = 'http://ztgvzxrb-rotate:8tmkgjfb6k44@p.webshare.io:80';
+        const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
         const process = spawn('./yt-dlp.sh', [
             '-f', 'bestaudio/best',
             '--extract-audio',
