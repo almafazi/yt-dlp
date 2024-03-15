@@ -29,7 +29,7 @@ if (cluster.isMaster) {
         redis: {
             host: 'localhost',
             port: 6379,
-            // password: '!Rahman214'
+            password: '!Rahman214'
         },
     });
 
