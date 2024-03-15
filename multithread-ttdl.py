@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify, render_template
 import base64
 import multiprocessing
 from flask_cors import CORS, cross_origin
+from flask_caching import Cache
 
 import concurrent.futures
 
@@ -115,8 +116,11 @@ def heavy_function(url, menu, download_url):
         return {"info": info, "download_data": download_data}
 
 
+cache = Cache(app, config={'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 300})
+
 @app.route('/tiktok', methods = ['POST'])
 @cross_origin()
+@cache.cached(timeout=300)
 def handle_request():
     request_data = json.loads(request.data)
 
