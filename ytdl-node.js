@@ -16,6 +16,7 @@ const queue = new Queue('yt-dlp-conversion', {
     redis: {
         host: 'localhost',
         port: 6379,
+        password: '!Rahman214'
     },
 });
 
