@@ -132,6 +132,7 @@ if (cluster.isMaster) {
         return new Promise((resolve, reject) => {
             const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
+                '--match-filter', 'duration <= 900',
                 '-f', 'bestaudio/best',
                 '--extract-audio',
                 '--audio-format', 'mp3',
@@ -160,7 +161,7 @@ if (cluster.isMaster) {
         });
     }
 
-    queue.process(2, async (job) => {
+    queue.process(5, async (job) => {
         const { youtubeUrl, outputPath } = job.data;
 
         try {
