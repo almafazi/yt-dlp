@@ -47,8 +47,8 @@ if (cluster.isMaster) {
         origin: '*',
     });
 
-    serverAdapter.setBasePath('/ui');
-    app.register(serverAdapter.registerPlugin(), { prefix: '/ui' });
+    serverAdapter.setBasePath('/bull-queue');
+    app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue' });
 
     app.post('/convert', async (request, reply) => {
         const { youtubeUrl } = request.body;
