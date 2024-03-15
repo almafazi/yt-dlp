@@ -52,7 +52,7 @@ app.post('/convert', async (request, reply) => {
 
     const outputPath = `./converted/${youtubeId}/%(title)s.%(ext)s`;
 
-    const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, {jobId: youtubeId});
+    const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, {jobId: youtubeId, removeOnFail: true});
     
     reply.send({ jobId: job.id });
 });
