@@ -29,7 +29,7 @@ if (cluster.isMaster) {
         redis: {
             host: 'localhost',
             port: 6379,
-            password: '!Rahman214'
+            // password: '!Rahman214'
         },
     });
 
@@ -132,12 +132,13 @@ if (cluster.isMaster) {
         return new Promise((resolve, reject) => {
             const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
-                '--match-filter', 'duration <= 900',
+                '--break-match-filters', 'duration <= 800',
                 '-f', 'bestaudio/best',
                 '--extract-audio',
                 '--audio-format', 'mp3',
                 '--audio-quality', '192',
                 '--embed-thumbnail', // Add this line to enable adding album art
+                '--max-filesize', '50M',
                 '-o', outputPath,
                 '--proxy', proxyUrl, // Add this line to set the proxy
                 youtubeUrl
@@ -161,7 +162,7 @@ if (cluster.isMaster) {
         });
     }
 
-    queue.process(5, async (job) => {
+    queue.process(10, async (job) => {
         const { youtubeUrl, outputPath } = job.data;
 
         try {
