@@ -118,8 +118,9 @@ def handle_request():
     url = request_data.get('url')
     menu = request_data.get('menu')
     download_url = request_data.get('download_url')
+    website_url = request_data.get('website_url')
 
-    if not url or not download_url:
+    if not url or not download_url or not website_url:
         return jsonify({
             'error': 'Missing required parameters.'
         }), 400
@@ -138,6 +139,7 @@ def handle_request():
                     "response-photos.html",
                     info=result.get("info"),
                     nFormatter=nFormatter,
+                    website_url=website_url,
                     download_data=result.get("download_data"),
                     menu=menu,
                     download_url=download_url,
@@ -152,6 +154,7 @@ def handle_request():
                     "response.html",
                     info=result.get("info"),
                     nFormatter=nFormatter,
+                    website_url=website_url,
                     download_data=result.get("download_data"),
                     menu=menu,
                     download_url=download_url,
