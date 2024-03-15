@@ -119,6 +119,7 @@ function generateDownloadUrl(outputPath, directoryPath) {
 
 async function convertToMp3(youtubeUrl, outputPath) {
     return new Promise((resolve, reject) => {
+        const proxyUrl = 'http://ztgvzxrb-rotate:8tmkgjfb6k44@p.webshare.io:80';
         const process = spawn('./yt-dlp.sh', [
             '-f', 'bestaudio/best',
             '--extract-audio',
@@ -126,6 +127,7 @@ async function convertToMp3(youtubeUrl, outputPath) {
             '--audio-quality', '192',
             '--embed-thumbnail', // Add this line to enable adding album art
             '-o', outputPath,
+            '--proxy', proxyUrl, // Add this line to set the proxy
             youtubeUrl
         ]);
 
