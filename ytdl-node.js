@@ -160,7 +160,7 @@ if (cluster.isMaster) {
         });
     }
 
-    queue.process(1, async (job) => {
+    queue.process(2, async (job) => {
         const { youtubeUrl, outputPath } = job.data;
 
         try {
