@@ -1,4 +1,4 @@
-const fastify = require('fastify');
+const app = require('fastify')()
 const { spawn } = require('child_process');
 const Queue = require('bull');
 const extractYoutubeId = require('youtube-video-id').default;
@@ -16,7 +16,7 @@ const queue = new Queue('yt-dlp-conversion', {
     redis: {
         host: 'localhost',
         port: 6379,
-        password: '!Rahman214'
+        //password: '!Rahman214'
     },
 });
 
@@ -25,10 +25,13 @@ createBullBoard({
   serverAdapter: serverAdapter,
 });
 
-const app = fastify();
+app.register(require('@fastify/static'), {
+    root: __dirname,
+    prefix: '/',
+})
 
 app.register(fastifyCors, {
-    origin: /\.snaptik\.vip$/,
+    origin: '*',
 });
 
 serverAdapter.setBasePath('/ui');
@@ -49,7 +52,7 @@ app.post('/convert', async (request, reply) => {
 
     const outputPath = `./converted/${youtubeId}/%(title)s.%(ext)s`;
 
-    const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, {jobId: youtubeId, removeOnComplete: true, removeOnFail: true});
+    const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, {jobId: youtubeId});
     
     reply.send({ jobId: job.id });
 });
@@ -67,6 +70,16 @@ app.get('/check/:jobId', async (request, reply) => {
     const status = await job.getState();
 
     reply.send({ progress, status });
+});
+
+app.get('/get-file', async (request, reply) => {
+    const { dlink } = request.query;
+    const outputPath = Buffer.from(dlink, 'base64').toString('utf-8');
+    const realFile = `${__dirname}/${outputPath}`;
+    const fileName = path.basename(realFile);
+
+    return reply.download(outputPath, fileName);
+
 });
 
 app.get('/download/:jobId', async (request, reply) => {
@@ -88,8 +101,9 @@ app.get('/download/:jobId', async (request, reply) => {
     const outputPath = job.data.outputPath;
     const directoryPath = job.data.directoryPath;
     const downloadUrl = generateDownloadUrl(outputPath, directoryPath);
+    const encodedUrl = Buffer.from(downloadUrl).toString('base64');
 
-    reply.send({ downloadUrl });
+    reply.send({ downloadUrl: encodedUrl });
 });
 
 function generateDownloadUrl(outputPath, directoryPath) {
@@ -152,5 +166,5 @@ app.listen({ port: 3007 }, (err) => {
         process.exit(1);
     }
 
-    console.log('Server is listening on port 3000');
+    console.log('Server is listening on port 3007');
 });
