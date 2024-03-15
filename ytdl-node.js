@@ -133,10 +133,18 @@ async function convertToMp3(youtubeUrl, outputPath) {
 
         process.on('exit', (code) => {
             if (code === 0) {
-                resolve();
+            resolve();
             } else {
-                reject(new Error(`Conversion failed with exit code ${code}`));
+            reject(new Error(`Conversion failed with exit code ${code}`));
             }
+        });
+
+        process.stdout.on('data', (data) => {
+            console.log(`Process output: ${data}`);
+        });
+
+        process.stderr.on('data', (data) => {
+            console.error(`Process error: ${data}`);
         });
     });
 }
