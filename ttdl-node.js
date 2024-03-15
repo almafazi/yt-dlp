@@ -1,8 +1,8 @@
 const { exec } = require('child_process');
 
-const url = 'https://www.tiktok.com/@topantambora/video/7321675178298117382'; // Replace VIDEO_ID with the actual video ID
+const url = 'asdad'; // Replace VIDEO_ID with the actual video ID
 
-const command = `./yt-dlp.sh --quiet --skip-download --dump-json --force-ipv4 ${url}`;
+const command = `./yt-dlp.sh --quiet --skip-download --dump-json ${url}`;
 
 exec(command, (error, stdout, stderr) => {
     if (error) {

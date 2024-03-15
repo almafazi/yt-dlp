@@ -23,6 +23,7 @@ def heavy_function(url, menu, download_url):
     ydl_opts = {
         "quiet": True,         
         "extractor_args": {"tiktok": {"api_hostname": ['api22-normal-c-useast2a.tiktokv.com']}},
+        "proxy": "http://ztgvzxrb-rotate:8tmkgjfb6k44@p.webshare.io:80"
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
