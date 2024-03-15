@@ -24,8 +24,12 @@ def heavy_function(url, menu, download_url):
         "quiet": True,         
         "extractor_args": {"tiktok": {"api_hostname": ['api22-normal-c-useast2a.tiktokv.com']}},
     }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+    except Exception as e:
+        
+        raise
     # return jsonify(info)
     audio = info.get("audio", [])
     formats = info.get("formats", [])
@@ -127,10 +131,14 @@ def handle_request():
 
     num_cores = multiprocessing.cpu_count()
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=num_cores) as executor:
-        future = executor.submit(heavy_function, url, menu, download_url)
-
-        result = future.result()
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_cores) as executor:
+            future = executor.submit(heavy_function, url, menu, download_url)
+            result = future.result()
+    except Exception as e:
+        return jsonify({
+            'error': 'Url tidak valid'
+        }), 422
 
     if result.get("photos"):
         return jsonify(
