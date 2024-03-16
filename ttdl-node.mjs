@@ -5,6 +5,7 @@ import { promisify } from 'util';
 import { renderFile as render_template } from 'ejs';
 import cluster from 'cluster';
 import os from 'os';
+import cors from '@fastify/cors'
 
 if (cluster.isPrimary) {
     const numWorkers = os.cpus().length;
@@ -35,6 +36,9 @@ function nFormatter(num) {
 }
 
 const app = Fastify({ logger: true });
+
+
+
 const redis = new Redis({
     port: 6379,
     host: "127.0.0.1",
@@ -53,6 +57,10 @@ app.setErrorHandler(function (error, request, reply) {
     }
     reply.send(error)
 })
+
+await app.register(cors, { 
+    origin: '*'
+});
 
 app.post('/extract', async (request, reply) => {
     const { url, download_url, website_url, menu } = request.body;
