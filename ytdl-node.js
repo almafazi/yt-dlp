@@ -23,6 +23,7 @@ if (cluster.isMaster) {
 
     cluster.on('exit', (worker, code, signal) => {
         console.log(`Worker ${worker.process.pid} died`);
+        cluster.fork();  // Create a new worker
     });
 } else {
 
@@ -51,10 +52,15 @@ if (cluster.isMaster) {
     });
 
     serverAdapter.setBasePath('/bull-queue');
-    app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue' });
-
     app.get('/check-folder/:id', async (request, reply) => {
         const { id } = request.params;
+        
+        // Validate that id exists
+        if (!id) {
+            reply.status(400).send({ message: 'id is required' });
+            return;
+        }
+        
         const folderPath = path.join(__dirname, 'converted', id);
         try {
             const folderExists = fs.existsSync(folderPath);
