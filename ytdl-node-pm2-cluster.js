@@ -132,6 +132,8 @@ require('dotenv').config()
         const fileName = path.basename(filePath);
 
         // Send the file
+        reply.header('Content-Length', fs.statSync(filePath).size);
+        reply.header('Content-Transfer-Encoding', 'binary');
         return reply.download(filePath, fileName);
     });
 
