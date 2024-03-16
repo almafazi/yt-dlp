@@ -4,7 +4,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const servers = ['http://localhost:3007'];
+const servers = ['https://node1.canehill.info'];
 app.use(cors());
 // Apply rate limit middleware
 const limiter = rateLimit({
