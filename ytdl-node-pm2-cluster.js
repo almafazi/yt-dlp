@@ -42,7 +42,9 @@ require('dotenv').config()
         origin: '*',
     });
 
-    serverAdapter.setBasePath('/bull-queue');
+    serverAdapter.setBasePath('/bull-queue-2024');
+    app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
+
     app.get('/check-folder/:id', async (request, reply) => {
         const { id } = request.params;
         

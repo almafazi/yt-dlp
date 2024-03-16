@@ -58,6 +58,7 @@ if (cluster.isMaster) {
     });
 
     serverAdapter.setBasePath('/bull-queue');
+    app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
     app.get('/check-folder/:id', async (request, reply) => {
         const { id } = request.params;
         
