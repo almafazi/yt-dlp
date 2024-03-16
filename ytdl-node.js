@@ -33,7 +33,7 @@ if (cluster.isMaster) {
         redis: {
             host: 'localhost',
             port: 6379,
-            password: process.env.REDIS_PASSWORD
+            password: '!Rahman214'
         },
     });
 
