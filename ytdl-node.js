@@ -12,7 +12,11 @@ const path = require('path');
 const fastifyCors = require('@fastify/cors');
 const crypto = require('crypto');
 const Redis = require("ioredis");
-const client = new Redis();
+const client = new Redis({
+    host: 'localhost',
+    port: 6379,
+    password: process.env.REDIS_PASSWORD
+});
 
 if (cluster.isMaster) {
     console.log(`Master ${process.pid} is running`);
@@ -33,7 +37,7 @@ if (cluster.isMaster) {
         redis: {
             host: 'localhost',
             port: 6379,
-            password: '!Rahman214'
+            password: process.env.REDIS_PASSWORD
         },
     });
 
