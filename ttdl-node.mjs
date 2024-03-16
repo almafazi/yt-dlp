@@ -62,7 +62,7 @@ await app.register(cors, {
     origin: '*'
 });
 
-app.post('/extract', async (request, reply) => {
+app.post('/tiktok', async (request, reply) => {
     const { url, download_url, website_url, menu } = request.body;
     if (!url || !download_url || !website_url) {
         return reply.code(400).send({ error: 'some params required' });
