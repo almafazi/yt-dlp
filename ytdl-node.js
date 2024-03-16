@@ -12,10 +12,12 @@ const path = require('path');
 const fastifyCors = require('@fastify/cors');
 const crypto = require('crypto');
 const Redis = require("ioredis");
+require('dotenv').config()
+
 const client = new Redis({
     host: 'localhost',
     port: 6379,
-    password: '!Rahman214'
+    password: process.env.REDIS_PASSWORD
 });
 
 if (cluster.isMaster) {
@@ -37,7 +39,7 @@ if (cluster.isMaster) {
         redis: {
             host: 'localhost',
             port: 6379,
-            password: '!Rahman214'
+            password: process.env.REDIS_PASSWORD
         },
     });
 
