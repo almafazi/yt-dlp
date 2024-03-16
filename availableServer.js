@@ -4,16 +4,16 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const servers = ['https://node1.canehill.info'];
+const servers = ['https://node1.canehill.info/api-dl'];
 app.use(cors());
-// Apply rate limit middleware
-// const limiter = rateLimit({
-//     windowMs: 60 * 1000, // 1 minute
-//     max: 3, // Maximum 2 requests per minute
-//     handler: function(req, res) {
-//         res.status(429).json({ message: 'You did this action too quickly, try again later.' });
-//     }
-// });
+
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 5, // Maximum 2 requests per minute
+    handler: function(req, res) {
+        res.status(429).json({ message: 'You did this action too quickly, try again later.' });
+    }
+});
 
 app.get('/check', async (req, res) => {
     const fileId = req.query.fileId;
