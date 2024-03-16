@@ -1,4 +1,4 @@
-const app = require('fastify')({ logger: true });
+const app = require('fastify')();
 const { spawn } = require('child_process');
 const Queue = require('bull');
 const extractYoutubeId = require('youtube-video-id').default;

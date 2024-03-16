@@ -4,11 +4,11 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const servers = ['https://node1.canehill.info/api-dl'];
+const servers = ['https://node1.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl'];
 app.use(cors());
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 5, // Maximum 2 requests per minute
+    max: 4, // Maximum 2 requests per minute
     handler: function(req, res) {
         res.status(429).json({ message: 'You did this action too quickly, try again later.' });
     }
