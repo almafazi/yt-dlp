@@ -3,6 +3,7 @@
 cookies
 *cookies.txt
 .netrc
+.env
 ttdl/*
 node_modules
 converted/*

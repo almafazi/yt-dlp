@@ -12,13 +12,18 @@ cron.schedule('*/10 * * * *', () => {
             // password: '!Rahman214'
         },
     });
-    const result = findRemoveSync(directory, { age: { hours: 3 }, dir: '*' });
-    if(result) {
-        Object.keys(result).forEach((file) => {
-            const fileName = file.split('/').pop();
-            queue.removeJobs(fileName).then(function () {
-                console.log('done removing jobs');
-            });
-        });
-    }
+    checkDiskSpace('/').then((diskSpace) => {
+        const freeSpaceInPercent = Math.round((diskSpace.free / diskSpace.size) * 100);
+        if(freeSpaceInPercent < 35) {
+            const result = findRemoveSync(directory, { age: { hours: 3 }, dir: '*' });
+            if(result) {
+                Object.keys(result).forEach((file) => {
+                    const fileName = file.split('/').pop();
+                    queue.removeJobs(fileName).then(function () {
+                        console.log('done removing jobs');
+                    });
+                });
+            }
+        }
+    })
 });

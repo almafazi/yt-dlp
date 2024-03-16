@@ -10,6 +10,9 @@ const { FastifyAdapter } = require('@bull-board/fastify');
 const fs = require('fs');
 const path = require('path');
 const fastifyCors = require('@fastify/cors');
+const crypto = require('crypto');
+const Redis = require("ioredis");
+const client = new Redis();
 
 if (cluster.isMaster) {
     console.log(`Master ${process.pid} is running`);
@@ -29,7 +32,7 @@ if (cluster.isMaster) {
         redis: {
             host: 'localhost',
             port: 6379,
-            // password: '!Rahman214'
+            password: process.env.REDIS_PASSWORD
         },
     });
 
@@ -50,6 +53,30 @@ if (cluster.isMaster) {
     serverAdapter.setBasePath('/bull-queue');
     app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue' });
 
+    app.get('/check-folder/:id', async (request, reply) => {
+        const { id } = request.params;
+        const folderPath = path.join(__dirname, 'converted', id);
+        try {
+            const folderExists = fs.existsSync(folderPath);
+            if (!folderExists) {
+                reply.send({ exists: false });
+                return;
+            }
+            const files = fs.readdirSync(folderPath);
+            const mp3File = files.find(file => path.extname(file) === '.mp3');
+            const containsMp3 = mp3File;
+            const mp3Path = containsMp3 ? path.join('converted', id, mp3File) : null;
+
+            const bufferMP3 = encrypt(mp3Path);
+            await client.del(bufferMP3);
+
+            reply.send({ exists: true, containsMp3, mp3Path: bufferMP3 });
+        } catch (error) {
+            console.error(`Failed to check folder: ${error.message}`);
+            reply.status(500).send({ message: 'Internal Server Error' });
+        }
+    });
+
     app.post('/convert', async (request, reply) => {
         const { youtubeUrl } = request.body;
         const youtubeId = extractYoutubeId(youtubeUrl);
@@ -64,7 +91,9 @@ if (cluster.isMaster) {
 
         const outputPath = `./converted/${youtubeId}/%(title)s.%(ext)s`;
 
-        const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, { jobId: youtubeId, removeOnFail: true });
+        const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, { jobId: youtubeId, removeOnFail: {
+            age: 15 * 60, // keep up to 15 minutes
+        }});
 
         reply.send({ jobId: job.id });
     });
@@ -86,11 +115,25 @@ if (cluster.isMaster) {
 
     app.get('/get-file', async (request, reply) => {
         const { dlink } = request.query;
-        const outputPath = Buffer.from(dlink, 'base64').toString('utf-8');
-        const realFile = `${__dirname}/${outputPath}`;
-        const fileName = path.basename(realFile);
 
-        return reply.download(outputPath, fileName);
+        // Check if the token has been used or expired
+        const check = await client.get(dlink);
+        if (check) {
+            reply.status(422).send({
+                'error': 'link has been used or expired. Please request a new link.'
+            });
+            return;
+        }
+
+        // Mark the token as used and set it to expire 5 minutes
+        await client.set(dlink, 'USED', 'EX', 5 * 60);
+
+        // Decrypt the token to get the file path
+        const filePath = decrypt(dlink);
+        const fileName = path.basename(filePath);
+
+        // Send the file
+        return reply.download(filePath, fileName);
     });
 
     app.get('/download/:jobId', async (request, reply) => {
@@ -112,9 +155,10 @@ if (cluster.isMaster) {
         const outputPath = job.data.outputPath;
         const directoryPath = job.data.directoryPath;
         const downloadUrl = generateDownloadUrl(outputPath, directoryPath);
-        const encodedUrl = Buffer.from(downloadUrl).toString('base64');
+        const dlink = encrypt(downloadUrl);
+        await client.del(dlink);
 
-        reply.send({ downloadUrl: encodedUrl });
+        reply.send({ downloadUrl: dlink });
     });
 
     function generateDownloadUrl(outputPath, directoryPath) {
@@ -173,6 +217,22 @@ if (cluster.isMaster) {
         }
     });
 
+    function encrypt(text) {
+        const key = crypto.scryptSync('encryption key', 'salt', 32);
+        const cipher = crypto.createCipheriv('aes-256-cbc', key, Buffer.alloc(16));
+        let encrypted = cipher.update(text, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        return encrypted;
+    }
+    
+    function decrypt(text) {
+        const key = crypto.scryptSync('encryption key', 'salt', 32);
+        const decipher = crypto.createDecipheriv('aes-256-cbc', key, Buffer.alloc(16));
+        let decrypted = decipher.update(text, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    }
+
     function validateYouTubeUrl(urlToParse) {
         if (urlToParse) {
             var regExp = /^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
@@ -188,7 +248,6 @@ if (cluster.isMaster) {
             console.error('Failed to start server:', err);
             process.exit(1);
         }
-
         console.log('Server is listening on port 3007');
     });
 }
