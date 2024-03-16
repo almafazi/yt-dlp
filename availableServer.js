@@ -6,7 +6,6 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const servers = ['https://node1.canehill.info/api-dl'];
 app.use(cors());
-
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 5, // Maximum 2 requests per minute
@@ -15,7 +14,7 @@ const limiter = rateLimit({
     }
 });
 
-app.get('/check', async (req, res) => {
+app.get('/check', limiter, async (req, res) => {
     const fileId = req.query.fileId;
 
     try {
