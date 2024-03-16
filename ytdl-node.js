@@ -15,7 +15,7 @@ const Redis = require("ioredis");
 const client = new Redis({
     host: 'localhost',
     port: 6379,
-    password: process.env.REDIS_PASSWORD
+    password: '!Rahman214'
 });
 
 if (cluster.isMaster) {
@@ -37,7 +37,7 @@ if (cluster.isMaster) {
         redis: {
             host: 'localhost',
             port: 6379,
-            password: process.env.REDIS_PASSWORD
+            password: '!Rahman214'
         },
     });
 
