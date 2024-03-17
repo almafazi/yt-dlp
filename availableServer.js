@@ -4,7 +4,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const servers = ['https://node1.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl'];
+const servers = ['https://node1.canehill.info/api-dl', 'https://dl1.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl'];
 app.use(cors());
 // const limiter = rateLimit({
 //     windowMs: 60 * 1000, // 1 minute
