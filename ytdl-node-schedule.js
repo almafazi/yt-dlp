@@ -8,7 +8,7 @@ const stat = promisify(fs.stat);
 const unlink = promisify(fs.unlink);
 const rmdir = promisify(fs.rmdir);
 
-cron.schedule('*/3 * * * *', () => {
+cron.schedule('*/1 * * * *', () => {
     const directory = `${__dirname}/converted`; 
 
     const queue = new Queue('yt-dlp-conversion', {
@@ -21,12 +21,12 @@ cron.schedule('*/3 * * * *', () => {
 
     checkDiskSpace('/').then( async (diskSpace) => {
         const freeSpaceInPercent = Math.round((diskSpace.free / diskSpace.size) * 100);
-        if(freeSpaceInPercent < 30) {
+        if(freeSpaceInPercent < 35) {
             const files = await readdir(directory);
             const fileStats = await Promise.all(files.map(file => stat(path.join(directory, file))));
             const fileStatMap = files.reduce((acc, file, index) => ({ ...acc, [file]: fileStats[index] }), {});
             const sortedFiles = files.sort((a, b) => fileStatMap[a].birthtime - fileStatMap[b].birthtime);
-            const filesToRemove = sortedFiles.slice(0, Math.round(sortedFiles.length * 0.3));
+            const filesToRemove = sortedFiles.slice(0, Math.round(sortedFiles.length * 0.35));
 
             await Promise.all(filesToRemove.map(async file => {
                 const filePath = path.join(directory, file);
