@@ -7,7 +7,11 @@ const cors = require('cors');
 require('dotenv').config()
 const app = express();
 const proxy = httpProxy.createProxyServer();
-const client = redis.createClient();
+const client = redis.createClient({
+    host: 'localhost',
+    port: 6379,
+    password: process.env.REDIS_PASSWORD
+});
 
 const servers = [
     { url: process.env.URL_1, weight: 60 },
