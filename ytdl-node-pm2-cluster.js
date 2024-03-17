@@ -173,7 +173,7 @@ require('dotenv').config()
         return downloadUrl;
     }
 
-    async function convertToMp3(youtubeUrl, outputPath, job) {
+    async function convertToMp3(youtubeUrl, outputPath) {
         return new Promise((resolve, reject) => {
             const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
@@ -189,11 +189,6 @@ require('dotenv').config()
                 youtubeUrl
             ]);
 
-            process.stderr.on('data', (data) => {
-                console.error(`Process error: ${data}`);
-                job.log(`Process error: ${data}`);
-            });
-
             process.on('exit', (code) => {
                 if (code === 0) {
                     resolve();
@@ -203,16 +198,27 @@ require('dotenv').config()
             });
 
             process.stdout.on('data', (data) => {
+                job.log(data);
                 console.log(`Process output: ${data}`);
+            });
+
+            process.stderr.on('data', (data) => {
+                console.error(`Process error: ${data}`);
+              //  reject(new Error(`Process error: ${data}`));
+            });
+
+            process.on('uncaughtException', (err, origin) => {
+                console.error(`Process errorun: ${data}`);
+
             });
         });
     }
 
-    queue.process(8, async (job) => {
+    queue.process(process.env.MAX_PROCCESS, async (job) => {
         const { youtubeUrl, outputPath } = job.data;
 
         try {
-            await convertToMp3(youtubeUrl, outputPath, job);
+            await convertToMp3(youtubeUrl, outputPath);
         } catch (error) {
             console.error(`Failed to convert ${youtubeUrl} to MP3: ${error.message}`);
             throw error;

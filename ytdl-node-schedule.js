@@ -1,29 +1,46 @@
 const cron = require('node-cron');
-const findRemoveSync = require('find-remove');
+const fs = require('fs');
+const path = require('path');
+const { promisify } = require('util');
 const Queue = require('bull');
+const readdir = promisify(fs.readdir);
+const stat = promisify(fs.stat);
+const unlink = promisify(fs.unlink);
+const rmdir = promisify(fs.rmdir);
 
-cron.schedule('*/5 * * * *', () => {
+cron.schedule('*/10 * * * *', () => {
     const directory = `${__dirname}/converted`; 
 
     const queue = new Queue('yt-dlp-conversion', {
         redis: {
             host: 'localhost',
             port: 6379,
-            password: '!Rahman214'
+            password: process.env.REDIS_PASSWORD
         },
     });
-    checkDiskSpace('/').then((diskSpace) => {
+
+    checkDiskSpace('/').then( async (diskSpace) => {
         const freeSpaceInPercent = Math.round((diskSpace.free / diskSpace.size) * 100);
-        if(freeSpaceInPercent < 25) {
-            const result = findRemoveSync(directory, { age: { minutes: 30 }, dir: '*' });
-            if(result) {
-                Object.keys(result).forEach((file) => {
-                    const fileName = file.split('/').pop();
-                    queue.removeJobs(fileName).then(function () {
-                        console.log('done removing jobs');
-                    });
-                });
-            }
+        if(freeSpaceInPercent < 30) {
+            const files = await readdir(directory);
+            const fileStats = await Promise.all(files.map(file => stat(path.join(directory, file))));
+            const fileStatMap = files.reduce((acc, file, index) => ({ ...acc, [file]: fileStats[index] }), {});
+            const sortedFiles = files.sort((a, b) => fileStatMap[a].birthtime - fileStatMap[b].birthtime);
+            const filesToRemove = sortedFiles.slice(0, Math.round(sortedFiles.length * 0.3));
+
+            await Promise.all(filesToRemove.map(async file => {
+                const filePath = path.join(directory, file);
+                if (fileStatMap[file].isDirectory()) {
+                    await rmdir(filePath, { recursive: true });
+                } else {
+                    await unlink(filePath);
+                }
+                await queue.removeJobs(file);
+            }));
         }
     })
 });
+
+
+
+
