@@ -2,6 +2,7 @@ const express = require('express');
 const httpProxy = require('http-proxy');
 const axios = require('axios');
 const redis = require('ioredis');
+const cors = require('cors');
 
 require('dotenv').config()
 const app = express();
@@ -13,6 +14,9 @@ const servers = [
     { url: process.env.URL_2, weight: 20 },
     { url: process.env.URL_3, weight: 20 },
 ];
+
+app.use(cors());
+
 
 app.use(async (req, res, next) => {
     let server;
