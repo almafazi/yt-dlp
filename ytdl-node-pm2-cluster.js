@@ -1,4 +1,4 @@
-const app = require('fastify')();
+const app = require('fastify')({logger: true});
 const { spawn } = require('child_process');
 const Queue = require('bull');
 const extractYoutubeId = require('youtube-video-id').default;
@@ -15,6 +15,8 @@ const disk = require('diskusage');
 const osUtils = require('os-utils');
 
 require('dotenv').config()
+
+    const MAX_PROCCESS = parseInt(process.env.MAX_PROCCESS) || 1;
 
     const client = new Redis({
         host: 'localhost',
@@ -228,7 +230,7 @@ require('dotenv').config()
         return downloadUrl;
     }
 
-    async function convertToMp3(youtubeUrl, outputPath) {
+    async function convertToMp3(youtubeUrl, outputPath, job) {
         return new Promise((resolve, reject) => {
             const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
@@ -269,11 +271,11 @@ require('dotenv').config()
         });
     }
 
-    queue.process(process.env.MAX_PROCCESS, async (job) => {
+    queue.process(MAX_PROCCESS, async (job) => {
         const { youtubeUrl, outputPath } = job.data;
 
         try {
-            await convertToMp3(youtubeUrl, outputPath);
+            await convertToMp3(youtubeUrl, outputPath, job);
         } catch (error) {
             console.error(`Failed to convert ${youtubeUrl} to MP3: ${error.message}`);
             throw error;
