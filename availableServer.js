@@ -5,8 +5,9 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-const servers_forhealth = ['https://dl1.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl'];
-const health = ['https://node1.canehill.info/api-dl'];
+const api_subdirectory = '/api-dl';
+const servers_forhealth = [`https://dl1.canehill.info${api_subdirectory}`, `https://dl2.canehill.info${api_subdirectory}`];
+const health = [`https://node1.canehill.info${api_subdirectory}`];
 
 // const servers_forhealth = ['http://localhost:3007'];
 // const health = ['http://localhost:3007'];
@@ -40,7 +41,7 @@ app.get('/check', async (req, res) => {
 
     try {
         
-        const fileCheckResponse = await axios.get(`${endpoint_url}/check-folder/${fileId}`);
+        const fileCheckResponse = await axios.get(`${endpoint_url}${api_subdirectory}/check-folder/${fileId}`);
         
         const fileExists = fileCheckResponse.data.exists;
 
