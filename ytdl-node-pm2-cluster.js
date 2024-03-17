@@ -194,11 +194,6 @@ require('dotenv').config()
                 job.log(`Process error: ${data}`);
             });
 
-            process.error.on('data', (data) => {
-                console.error(`Process error: ${data}`);
-                job.log(`Process error: ${data}`);
-            });
-
             process.on('exit', (code) => {
                 if (code === 0) {
                     resolve();
