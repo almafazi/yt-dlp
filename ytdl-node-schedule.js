@@ -8,7 +8,7 @@ const stat = promisify(fs.stat);
 const unlink = promisify(fs.unlink);
 const rmdir = promisify(fs.rmdir);
 
-cron.schedule('*/10 * * * *', () => {
+cron.schedule('*/3 * * * *', () => {
     const directory = `${__dirname}/converted`; 
 
     const queue = new Queue('yt-dlp-conversion', {

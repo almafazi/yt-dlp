@@ -35,7 +35,7 @@ app.get('/check', async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        res.status(500).send('Error occurred during conversion process');
+        res.status(500).send('Error occurred during health check process');
     }
 
     try {
@@ -51,7 +51,7 @@ app.get('/check', async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        res.status(500).send('Error occurred during conversion process');
+        res.status(500).send('Error occurred during fiile check process');
     }
 });
 

@@ -73,8 +73,8 @@ require('dotenv').config()
     
             // Define your thresholds
             const cpuThreshold = 75; // 80% usage
-            const memoryThreshold = 100; // 80% usage
-            const diskThreshold = 75; // 80% usage
+            const memoryThreshold = 75; // 80% usage
+            const diskThreshold = 90; // 80% usage
     
             // Determine health status based on thresholds
             let healthStatus = 'healthy';

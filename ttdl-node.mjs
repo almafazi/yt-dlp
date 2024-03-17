@@ -46,7 +46,7 @@ const redis = new Redis({
 });
 
 await app.register(import('@fastify/rate-limit'), {
-    max: 3,
+    max: 4,
     timeWindow: '1 minute'
 })
 
@@ -84,7 +84,7 @@ app.post('/tiktok', async (request, reply) => {
                 stdout = stderr;
             }
         }
-        await redis.set(url, stdout, 'EX', 300);
+        await redis.set(url, stdout, 'EX', 900);
         const info = JSON.parse(stdout);
         const renderedHtml = await getRenderHtml(info, website_url, download_url, menu);
         return reply.send({ "html": renderedHtml });
@@ -143,7 +143,7 @@ async function responseParser(info, download_url) {
 }
 async function extractInfo(url) {
     try {
-        const proxy = '--proxy http://ztgvzxrb-rotate:8tmkgjfb6k44@p.webshare.io:80';
+        const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
         const { stdout, stderr } = await exec(`./yt-dlp.sh --no-warnings --no-check-certificates --skip-download --dump-json --quiet ${proxy} ${url}`);
         return { stdout, stderr };
     } catch (error) {
