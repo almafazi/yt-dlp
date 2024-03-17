@@ -50,6 +50,7 @@ require('dotenv').config()
     app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
 
     app.get('/health', async (request, reply) => {
+        console.log(process.env.MAX_PROCCESS);
         try {
             const totalMemory = os.totalmem();
             const freeMemory = os.freemem();
