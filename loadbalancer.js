@@ -62,8 +62,9 @@ app.use(async (req, res, next) => {
     proxy.on('proxyRes', function (proxyRes, req, res) {
         res.setHeader('X-Server-URL', server.url);
     });
-    proxy.web(req, res, { target: server.url, rejectUnauthorized: false,   changeOrigin: true,
-    });
+    proxy.web(req, res, { target: server.url, rejectUnauthorized: false,   changeOrigin: true});
+    res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
+
 });
 
 app.listen(3033);
