@@ -203,6 +203,7 @@ require('dotenv').config()
 
             process.stderr.on('data', (data) => {
                 console.error(`Process error: ${data}`);
+                reject(new Error(`Process error: ${data}`));
             });
         });
     }
