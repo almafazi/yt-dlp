@@ -25,11 +25,11 @@ app.get('/check', async (req, res) => {
     const fileId = req.query.fileId;
 
     let endpoint_url = health;
-
+    let serverWithHealth = null;
     try {
         const healthCheckPromises = servers_forhealth.map(server => axios.get(`${server}/health`).catch(error => ({ error })));
         const healthResponses = await Promise.all(healthCheckPromises);
-        const serverWithHealth = healthResponses.find(response => !response.error && response.data.healthStatus === 'healthy');
+        serverWithHealth = healthResponses.find(response => !response.error && response.data.healthStatus === 'healthy');
         const serverHealth = serverWithHealth ? serverWithHealth.config.url.split('/')[2] : null;
         if(serverHealth){
             endpoint_url = `${serverHealth.startsWith('http') ? '' : 'http://'}${serverHealth}${api_subdirectory}`;
@@ -46,7 +46,7 @@ app.get('/check', async (req, res) => {
         const fileExists = fileCheckResponse.data.exists;
 
         if (fileExists) {
-            res.json({ server: endpoint_url, exists: true, ...serverWithFile.data});
+            res.json({ server: endpoint_url, exists: true, ...serverWithHealth.data});
         } else {
             res.json({ server: endpoint_url, exists: false });
         }
