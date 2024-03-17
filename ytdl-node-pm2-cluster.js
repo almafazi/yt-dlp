@@ -177,7 +177,7 @@ require('dotenv').config()
         return new Promise((resolve, reject) => {
             const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
-                '--break-match-filters', 'duration <= 800',
+                '--break-match-filters', 'duration <= 950',
                 '-f', 'bestaudio/best',
                 '--extract-audio',
                 '--audio-format', 'mp3',
