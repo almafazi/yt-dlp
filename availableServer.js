@@ -32,7 +32,7 @@ app.get('/check', async (req, res) => {
         const serverWithHealth = healthResponses.find(response => !response.error && response.data.healthStatus === 'healthy');
         const serverHealth = serverWithHealth ? serverWithHealth.config.url.split('/')[2] : null;
         if(serverHealth){
-            endpoint_url = `${serverHealth.startsWith('http') ? '' : 'http://'}${serverHealth}`;
+            endpoint_url = `${serverHealth.startsWith('http') ? '' : 'http://'}${serverHealth}${api_subdirectory}`;
         }
     } catch (error) {
         console.log(error);
@@ -41,7 +41,7 @@ app.get('/check', async (req, res) => {
 
     try {
         
-        const fileCheckResponse = await axios.get(`${endpoint_url}${api_subdirectory}/check-folder/${fileId}`);
+        const fileCheckResponse = await axios.get(`${endpoint_url}/check-folder/${fileId}`);
         
         const fileExists = fileCheckResponse.data.exists;
 
