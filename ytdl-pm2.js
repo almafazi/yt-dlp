@@ -52,7 +52,6 @@ require('dotenv').config()
     app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
 
     app.get('/health', async (request, reply) => {
-        console.log(process.env.MAX_PROCCESS);
         try {
             const totalMemory = os.totalmem();
             const freeMemory = os.freemem();
@@ -82,54 +81,20 @@ require('dotenv').config()
             // Determine health status based on thresholds
             let healthStatus = 'healthy';
             if (cpuUsage * 100 > cpuThreshold) {
-                healthStatus = 'unhealthy (high CPU usage)';
+                healthStatus = 'unhealthy';
             } else if (memoryUsagePercent > memoryThreshold) {
-                healthStatus = 'unhealthy (high memory usage)';
+                healthStatus = 'unhealthy';
             } else if ((diskUsage.total - diskUsage.free) / diskUsage.total > diskThreshold / 100) {
-                healthStatus = 'unhealthy (low disk space)';
+                healthStatus = 'unhealthy';
             }
     
             reply.send({
-                cpuUsage: cpuUsage * 100, // Convert to percentage
-                memoryUsage: memoryUsagePercent,
-                diskUsage: (diskUsage.total - diskUsage.free) / 1024 / 1024, // Convert to MB
-                totalDiskSpace: diskUsage.total / 1024 / 1024, // Convert to MB
                 healthStatus: healthStatus
             });
         } catch (error) {
-            console.error("Error:", error);
-            reply.status(500).send("Internal Server Error");
-        }
-    });
-
-    app.get('/check-folder/:id', async (request, reply) => {
-        const { id } = request.params;
-        
-        // Validate that id exists
-        if (!id) {
-            reply.status(400).send({ message: 'id is required' });
-            return;
-        }
-        
-        const folderPath = path.join(__dirname, 'converted', id);
-        try {
-            const folderExists = fs.existsSync(folderPath);
-            if (!folderExists) {
-                reply.send({ exists: false });
-                return;
-            }
-            const files = fs.readdirSync(folderPath);
-            const mp3File = files.find(file => path.extname(file) === '.mp3');
-            const containsMp3 = mp3File;
-            const mp3Path = containsMp3 ? path.join('converted', id, mp3File) : null;
-
-            const bufferMP3 = encrypt(mp3Path);
-            await client.del(bufferMP3);
-
-            reply.send({ exists: true, containsMp3, mp3Path: bufferMP3 });
-        } catch (error) {
-            console.error(`Failed to check folder: ${error.message}`);
-            reply.status(500).send({ message: 'Internal Server Error' });
+            reply.send({
+                healthStatus: 'unhealthy'
+            });
         }
     });
 
@@ -145,13 +110,47 @@ require('dotenv').config()
             return;
         }
 
-        const outputPath = `./converted/${youtubeId}/%(title)s.%(ext)s`;
+        const id = youtubeId;
 
-        const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, { jobId: youtubeId, removeOnFail: {
-            age: 15 * 60, // keep up to 15 minutes
-        }});
+        try {
+            const folderPath = path.join(__dirname, 'converted', id);
+            const folderExists = fs.existsSync(folderPath);
+            let mp3file = null;
+            
+            if(folderExists) {
+                const files = fs.readdirSync(folderPath);
+                mp3file = files.find(file => path.extname(file) === '.mp3');
+            }
 
-        reply.send({ jobId: job.id });
+            if (!folderExists || !mp3file) {
+                const outputPath = `./converted/${youtubeId}/%(title)s.%(ext)s`;
+
+                const existingJob = await queue.getJob(youtubeId);
+                if (existingJob) {
+                    const status = await existingJob.getState();
+                    if (status === 'completed') {
+                        await existingJob.remove();
+                    }
+                }
+
+                const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, { jobId: youtubeId, removeOnFail: {
+                    age: 15 * 60, // keep up to 15 minutes
+                }});
+
+                reply.send({ exists: false, jobId: job.id });
+                return;
+            } else {
+                const containsMp3 = mp3file;
+                const mp3Path = containsMp3 ? path.join('converted', id, mp3file) : null;
+                const bufferMP3 = encrypt(mp3Path);
+                await client.del(bufferMP3);
+
+                reply.send({ exists: true, containsMp3, mp3Path: bufferMP3 });
+            }
+    
+        } catch (error) {
+            reply.status(500).send({ message: `Failed to check folder: ${error.message}` });
+        }
     });
 
     app.get('/check/:jobId', async (request, reply) => {
