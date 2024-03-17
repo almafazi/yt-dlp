@@ -10,6 +10,10 @@ const path = require('path');
 const fastifyCors = require('@fastify/cors');
 const crypto = require('crypto');
 const Redis = require("ioredis");
+const os = require('os');
+const disk = require('diskusage');
+const osUtils = require('os-utils');
+
 require('dotenv').config()
 
     const client = new Redis({
@@ -44,6 +48,56 @@ require('dotenv').config()
 
     serverAdapter.setBasePath('/bull-queue-2024');
     app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
+
+    app.get('/health', async (request, reply) => {
+        try {
+            const totalMemory = os.totalmem();
+            const freeMemory = os.freemem();
+            const usedMemory = totalMemory - freeMemory;
+            const memoryUsagePercent = (usedMemory / totalMemory) * 100;
+    
+            const cpuUsagePromise = new Promise((resolve, reject) => {
+                osUtils.cpuUsage((cpuUsage) => {
+                    resolve(cpuUsage);
+                });
+            });
+    
+            const diskUsagePromise = new Promise((resolve, reject) => {
+                disk.check('/', (err, info) => {
+                    if (err) reject(err);
+                    resolve(info);
+                });
+            });
+    
+            const [cpuUsage, diskUsage] = await Promise.all([cpuUsagePromise, diskUsagePromise]);
+    
+            // Define your thresholds
+            const cpuThreshold = 75; // 80% usage
+            const memoryThreshold = 100; // 80% usage
+            const diskThreshold = 75; // 80% usage
+    
+            // Determine health status based on thresholds
+            let healthStatus = 'healthy';
+            if (cpuUsage * 100 > cpuThreshold) {
+                healthStatus = 'unhealthy (high CPU usage)';
+            } else if (memoryUsagePercent > memoryThreshold) {
+                healthStatus = 'unhealthy (high memory usage)';
+            } else if ((diskUsage.total - diskUsage.free) / diskUsage.total > diskThreshold / 100) {
+                healthStatus = 'unhealthy (low disk space)';
+            }
+    
+            reply.send({
+                cpuUsage: cpuUsage * 100, // Convert to percentage
+                memoryUsage: memoryUsagePercent,
+                diskUsage: (diskUsage.total - diskUsage.free) / 1024 / 1024, // Convert to MB
+                totalDiskSpace: diskUsage.total / 1024 / 1024, // Convert to MB
+                healthStatus: healthStatus
+            });
+        } catch (error) {
+            console.error("Error:", error);
+            reply.status(500).send("Internal Server Error");
+        }
+    });
 
     app.get('/check-folder/:id', async (request, reply) => {
         const { id } = request.params;

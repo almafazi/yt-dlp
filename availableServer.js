@@ -4,7 +4,13 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const servers = ['https://node1.canehill.info/api-dl', 'https://dl1.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl'];
+
+const servers_forhealth = ['https://dl1.canehill.info/api-dl', 'https://dl2.canehill.info/api-dl'];
+const health = ['https://node1.canehill.info/api-dl'];
+
+// const servers_forhealth = ['http://localhost:3007'];
+// const health = ['http://localhost:3007'];
+
 app.use(cors());
 // const limiter = rateLimit({
 //     windowMs: 60 * 1000, // 1 minute
@@ -17,23 +23,31 @@ app.use(cors());
 app.get('/check', async (req, res) => {
     const fileId = req.query.fileId;
 
+    let endpoint_url = health;
+
     try {
-        // Check if any server already has the file
-        const checkPromises = servers.map(server => axios.get(`${server}/check-folder/${fileId}`));
-        const responses = await Promise.all(checkPromises);
+        const healthCheckPromises = servers_forhealth.map(server => axios.get(`${server}/health`).catch(error => ({ error })));
+        const healthResponses = await Promise.all(healthCheckPromises);
+        const serverWithHealth = healthResponses.find(response => !response.error && response.data.healthStatus === 'healthy');
+        const serverHealth = serverWithHealth ? serverWithHealth.config.url.split('/')[2] : null;
+        if(serverHealth){
+            endpoint_url = `${serverHealth.startsWith('http') ? '' : 'http://'}${serverHealth}`;
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error occurred during conversion process');
+    }
 
-        // Find the first server that has the file
-        const serverWithFile = responses.find(response => response.data.exists);
+    try {
+        
+        const fileCheckResponse = await axios.get(`${endpoint_url}/check-folder/${fileId}`);
+        
+        const fileExists = fileCheckResponse.data.exists;
 
-        if (serverWithFile) {
-            // File exists on a server, apply conversion process on that server
-            const serverName = serverWithFile.config.url.split('/')[2];
-            const serverNameWithProtocol = `${serverName.startsWith('http') ? '' : 'http://'}${serverName}`;
-            res.json({ server: serverNameWithProtocol, exists: true, ...serverWithFile.data});
+        if (fileExists) {
+            res.json({ server: endpoint_url, exists: true, ...serverWithFile.data});
         } else {
-            // No server has the file, randomly choose a server
-            const randomServer = servers[Math.floor(Math.random() * servers.length)];
-            res.json({ server: randomServer, exists: false });
+            res.json({ server: endpoint_url, exists: false });
         }
     } catch (error) {
         console.log(error);
