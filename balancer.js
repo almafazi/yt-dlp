@@ -84,7 +84,7 @@ app.use(async (req, res, next) => {
     const healthyServer = await Promise.race(healthCheckPromises);
     if (!healthyServer) {
         // If no server is healthy, reject the request
-        res.status(503).send('Service Unavailable');
+        res.status(503).send('Server Full');
         return;
     }
 
