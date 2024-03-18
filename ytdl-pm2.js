@@ -48,8 +48,8 @@ require('dotenv').config()
         origin: '*',
     });
 
-    serverAdapter.setBasePath('/bull-queue-2024');
-    app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
+    serverAdapter.setBasePath(process.env.SERVER_ENDPOINT+'/bull-queue-2024');
+    app.register(serverAdapter.registerPlugin(), { prefix: process.env.SERVER_ENDPOINT+'/bull-queue-2024' });
 
     app.get('/health', async (request, reply) => {
         try {
