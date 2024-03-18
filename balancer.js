@@ -125,35 +125,42 @@ app.use(async (req, res, next) => {
 
     if (serverFromCache) {
         server = servers.find(s => s.url === serverFromCache);
-    } else {
+        const healthCheck = await axios.get(`${server.url}/health`).then(response => response.data.healthStatus === 'healthy').catch(() => false);
+        if (!healthCheck) {
+            server = null;  // If the server from Redis is not healthy, set server to null
+        }
+    }
+
+    if (!server) {
+        // If the server from Redis is not healthy or doesn't exist, select a new server
         const totalWeight = servers.reduce((total, server) => total + server.weight, 0);
+        let weightSum = 0;
         const random = Math.floor(Math.random() * totalWeight);
 
-        let weightSum = 0;
         for (const s of servers) {
             weightSum += s.weight;
             if (random < weightSum) {
-                server = s;
-                break;
+                const healthCheck = await axios.get(`${s.url}/health`).then(response => response.data.healthStatus === 'healthy').catch(() => false);
+                if (healthCheck) {
+                    server = s;
+                    break;
+                }
             }
         }
 
-        client.set('server', server.url, 'EX', 60);  // Cache the server selection for 60 seconds
+        if (!server) {
+            // If no server is healthy, reject the request
+            res.status(503).send('Server Penuh');
+            return;
+        }
+
+        client.set('server', server.url, 'EX', 60);  // Cache the new server selection for 60 seconds
     }
-
-    // Perform a health check on the selected server
-    const healthyServer = await getHealthyServer(servers);
-
-    if (!healthyServer) {
-        // If no server is healthy, reject the request
-        res.status(503).send('Server Penuh');
-        return;
-    }
-
+    
     proxy.on('proxyRes', function (proxyRes, req, res) {
-        res.setHeader('X-Server-URL', healthyServer.url);
+        res.setHeader('X-Server-URL', server.url);
     });
-    proxy.web(req, res, { target: healthyServer.url, changeOrigin: true});
+    proxy.web(req, res, { target: server.url, changeOrigin: true});
     res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
 
 });
