@@ -133,7 +133,7 @@ require('dotenv').config()
                 const bufferMP3 = encrypt(mp3Path);
                 await client.del(bufferMP3);
 
-                reply.send({ exists: true, isFileExists: true, filePath: bufferMP3 });
+                reply.send({ exists: true, containsMp3, mp3Path: bufferMP3, server: process.env.SERVER_ENDPOINT });
             } else {
                 reply.status(404);
             }

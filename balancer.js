@@ -28,6 +28,36 @@ const servers = [
 
 app.use(cors());
 
+async function searchFileOnServers(id, servers) {
+    // Create an array of promises that resolve when the file is found
+    const fileExistPromises = servers.map(server =>
+        axios.get(`${server.url}/filecheckcdn/${id}`)
+            .then(response => {
+                if (response.status === 200) {
+                    return { server: server.url, mp3Path: response.data.filePath, exists: true };
+                }
+                throw new Error('Not found on this server');
+            })
+            .catch(error => ({ server: server.url, mp3Path: null, exists: false }))
+    );
+
+    while (fileExistPromises.length > 0) {
+        // Wait for the fastest promise to resolve
+        const result = await Promise.race(fileExistPromises);
+
+        // If the file was found, return the result
+        if (result.exists) {
+            return result;
+        }
+
+        // If the file was not found, remove the promise from the array
+        fileExistPromises.splice(fileExistPromises.findIndex(p => p === result), 1);
+    }
+
+    // If the file was not found on any server, continue the proxy
+    return null;
+}
+
 app.use(async (req, res, next) => {
     const { youtubeUrl } = req.body;
     const youtubeId = extractYoutubeId(youtubeUrl);
@@ -43,20 +73,12 @@ app.use(async (req, res, next) => {
     const id = youtubeId;
     let server;
 
-    // Check if the file exists on any server
-    const fileExistPromises = servers.map(s => 
-        axios.get(`${s.url}/filecheckcdn/${id}`)
-            .then(response => ({ server: s, filePath: response.data.filePath, isFileExists: true }))
-            .catch(() => ({ server: s, filePath: null, isFileExists: false }))
-    );
-    const result = await Promise.race(fileExistPromises);
-    console.log(result);
+    const result = await searchFileOnServers(id, servers);
 
-    if (result.isFileExists) {
+    if (result) {
         res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
-        res.setHeader('X-Server-URL', result.server.url);
-        res.json({ exists: true, isFileExists: result.isFileExists, filePath: result.filePath });
-
+        res.setHeader('X-Server-URL', result.server);
+        res.json(result);
         return;
     }
 
@@ -100,17 +122,6 @@ app.use(async (req, res, next) => {
     proxy.web(req, res, { target: healthyServer.url, changeOrigin: true});
     res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
 
-});
-
-proxy.on('proxyReq', (proxyReq, req) => {
-    if (req.body) {
-        const bodyData = JSON.stringify(req.body);
-        // incase if content-type is application/x-www-form-urlencoded -> we need to change to application/json
-        proxyReq.setHeader('Content-Type','application/json');
-        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-        // stream the content
-        proxyReq.write(bodyData);
-    }
 });
 
 function validateYouTubeUrl(urlToParse) {
