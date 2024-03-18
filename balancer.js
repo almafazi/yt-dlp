@@ -88,16 +88,16 @@ app.use(async (req, res, next) => {
         return;
     }
 
-    proxy(healthyServer.url, {
-        proxyErrorHandler: function(err, res, next) {
-            console.error('Failed to proxy:', err);
-            next(err);
-        },
-        proxyReqOptDecorator: function(proxyReqOpts, srcReq) {
-            proxyReqOpts.headers['X-Server-URL'] = healthyServer.url;
-            return proxyReqOpts;
-        }
-    })(req, res);
+    // proxy(healthyServer.url, {
+    //     proxyErrorHandler: function(err, res, next) {
+    //         console.error('Failed to proxy:', err);
+    //         next(err);
+    //     },
+    //     proxyReqOptDecorator: function(proxyReqOpts, srcReq) {
+    //         proxyReqOpts.headers['X-Server-URL'] = healthyServer.url;
+    //         return proxyReqOpts;
+    //     }
+    // })(req, res);
 
     // res.setHeader('X-Server-URL', healthyServer.url);
     res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
