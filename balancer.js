@@ -28,6 +28,38 @@ const servers = [
 
 app.use(cors());
 
+
+async function getHealthyServer(servers) {
+    // Create an array of promises that resolve when a server is healthy
+    const healthCheckPromises = servers.map(server =>
+        axios.get(`${server.url}/health`)
+            .then(response => {
+                
+                if (response.data.healthStatus === 'healthy') {
+                    return server;
+                }
+                throw new Error('Server is not healthy');
+            })
+            .catch(error => null)
+    );
+
+    while (healthCheckPromises.length > 0) {
+        // Wait for the fastest promise to resolve
+        const result = await Promise.race(healthCheckPromises);
+
+        // If a server is healthy, return true
+        if (result) {
+            return result;
+        }
+
+        // If a server is not healthy, remove the promise from the array
+        healthCheckPromises.splice(healthCheckPromises.findIndex(p => p === result), 1);
+    }
+
+    // If no server is healthy, return null
+    return null;
+}
+
 async function searchFileOnServers(id, servers) {
     // Create an array of promises that resolve when the file is found
     const fileExistPromises = servers.map(server =>
@@ -60,11 +92,13 @@ async function searchFileOnServers(id, servers) {
 
 app.use(async (req, res, next) => {
     const { youtubeUrl } = req.body;
-    const youtubeId = extractYoutubeId(youtubeUrl);
     if (!youtubeUrl) {
         res.status(400).json({ message: 'youtubeUrl is required' });
         return;
     }
+
+    const youtubeId = extractYoutubeId(youtubeUrl);
+
     if (!validateYouTubeUrl(youtubeUrl)) {
         res.status(400).json({ message: 'Invalid youtubeUrl' });
         return;
@@ -108,8 +142,8 @@ app.use(async (req, res, next) => {
     }
 
     // Perform a health check on the selected server
-    const healthCheckPromises = servers.map(s => axios.get(`${s.url}/health`).then(() => s).catch(() => null));
-    const healthyServer = await Promise.race(healthCheckPromises);
+    const healthyServer = await getHealthyServer(servers);
+
     if (!healthyServer) {
         // If no server is healthy, reject the request
         res.status(503).send('Server Penuh');
@@ -117,7 +151,7 @@ app.use(async (req, res, next) => {
     }
 
     proxy.on('proxyRes', function (proxyRes, req, res) {
-        res.setHeader('X-Server-URL', server.url);
+        res.setHeader('X-Server-URL', healthyServer.url);
     });
     proxy.web(req, res, { target: healthyServer.url, changeOrigin: true});
     res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
