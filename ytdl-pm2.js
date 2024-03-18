@@ -76,7 +76,7 @@ require('dotenv').config()
             // Define your thresholds
             const cpuThreshold = 75; // 80% usage
             const memoryThreshold = 75; // 80% usage
-            const diskThreshold = 90; // 80% usage
+            const diskThreshold = 75; // 80% usage
     
             // Determine health status based on thresholds
             let healthStatus = 'healthy';
@@ -98,7 +98,39 @@ require('dotenv').config()
         }
     });
 
+    app.get('/filecheckcdn/:id', async (req, reply) => {
+        const id = req.params.id;
+
+        try {
+            const folderPath = path.join(__dirname, 'converted', id);
+            const folderExists = fs.existsSync(folderPath);
+            let mp3file = null;
+            
+            if(folderExists) {
+                const files = fs.readdirSync(folderPath);
+                mp3file = files.find(file => path.extname(file) === '.mp3');
+            } else {
+                reply.status(404);
+            }
+
+            if (folderExists || mp3file) {
+                const containsMp3 = mp3file;
+                const mp3Path = containsMp3 ? path.join('converted', id, mp3file) : null;
+                const bufferMP3 = encrypt(mp3Path);
+                await client.del(bufferMP3);
+
+                reply.send({ exists: true, isFileExists: true, filePath: bufferMP3 });
+            } else {
+                reply.status(404);
+            }
+    
+        } catch (error) {
+            reply.status(404);
+        }
+    });
+
     app.post('/convert', async (request, reply) => {
+        console.log('papa');
         const { youtubeUrl } = request.body;
         const youtubeId = extractYoutubeId(youtubeUrl);
         if (!youtubeUrl) {

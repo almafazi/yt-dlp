@@ -30,6 +30,7 @@ cron.schedule('*/1 * * * *', () => {
 
             await Promise.all(filesToRemove.map(async file => {
                 const filePath = path.join(directory, file);
+                console.log({free: freeSpaceInPercent, deleted: filePath})
                 if (fileStatMap[file].isDirectory()) {
                     await rmdir(filePath, { recursive: true });
                 } else {
