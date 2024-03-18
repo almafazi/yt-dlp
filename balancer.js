@@ -34,7 +34,7 @@ async function searchFileOnServers(id, servers) {
         axios.get(`${server.url}/filecheckcdn/${id}`)
             .then(response => {
                 if (response.status === 200) {
-                    return { server: server.url, mp3Path: response.data.filePath, exists: true };
+                    return { server: server.url, mp3Path: response.data.mp3Path, exists: true };
                 }
                 throw new Error('Not found on this server');
             })
