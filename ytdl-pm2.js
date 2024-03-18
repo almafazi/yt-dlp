@@ -34,7 +34,8 @@ require('dotenv').config()
         },
     });
 
-    let node2 = null;
+    let queueList = [new BullAdapter(queue)];
+
 
     if(process.env.MAIN_SERVER) {
          node2 = new Queue(process.env.QUEUE_NAME_SECONDARY, {
@@ -44,10 +45,11 @@ require('dotenv').config()
                 password: process.env.QUEUE_PASSWORD_SECONDARY,
             },
         });
+        queueList = [new BullAdapter(queue), new BullAdapter(node2)];
     }
 
     createBullBoard({
-        queues: [new BullAdapter(queue), new BullAdapter(node2)],
+        queues: queueList,
         serverAdapter: serverAdapter,
     });
 
@@ -189,7 +191,7 @@ require('dotenv').config()
                 const bufferMP3 = encrypt(mp3Path);
                 await client.del(bufferMP3);
 
-                reply.send({ exists: true, containsMp3, mp3Path: bufferMP3 });
+                reply.send({ exists: true, containsMp3, mp3Path: bufferMP3, server: process.env.SERVER_ENDPOINT });
             }
     
         } catch (error) {

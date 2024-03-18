@@ -5,6 +5,7 @@ const cors = require('cors');
 const extractYoutubeId = require('youtube-video-id').default;
 const proxy = require('express-http-proxy');
 
+require('dotenv').config()
 const client = redis.createClient({
     host: 'localhost',
     port: 6379,
@@ -91,10 +92,14 @@ app.use(async (req, res, next) => {
         proxyErrorHandler: function(err, res, next) {
             console.error('Failed to proxy:', err);
             next(err);
+        },
+        proxyReqOptDecorator: function(proxyReqOpts, srcReq) {
+            proxyReqOpts.headers['X-Server-URL'] = healthyServer.url;
+            return proxyReqOpts;
         }
     })(req, res);
 
-    res.setHeader('X-Server-URL', healthyServer.url);
+    // res.setHeader('X-Server-URL', healthyServer.url);
     res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
 
 });
