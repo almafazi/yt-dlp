@@ -3,7 +3,7 @@ const axios = require('axios');
 const redis = require('ioredis');
 const cors = require('cors');
 const extractYoutubeId = require('youtube-video-id').default;
-const proxy = require('express-http-proxy');
+const httpProxy = require('http-proxy');
 
 require('dotenv').config()
 const client = redis.createClient({
@@ -13,8 +13,13 @@ const client = redis.createClient({
 });
 
 const app = express();
+const proxy = httpProxy.createProxyServer();
+
+// Parse JSON bodies
 app.use(express.json());
 
+// Parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
 
 const servers = [
     { url: process.env.URL_1, weight: 60 },
@@ -84,24 +89,27 @@ app.use(async (req, res, next) => {
     const healthyServer = await Promise.race(healthCheckPromises);
     if (!healthyServer) {
         // If no server is healthy, reject the request
-        res.status(503).send('Server Full');
+        res.status(503).send('Server Penuh');
         return;
     }
 
-    // proxy(healthyServer.url, {
-    //     proxyErrorHandler: function(err, res, next) {
-    //         console.error('Failed to proxy:', err);
-    //         next(err);
-    //     },
-    //     proxyReqOptDecorator: function(proxyReqOpts, srcReq) {
-    //         proxyReqOpts.headers['X-Server-URL'] = healthyServer.url;
-    //         return proxyReqOpts;
-    //     }
-    // })(req, res);
-
-    // res.setHeader('X-Server-URL', healthyServer.url);
+    proxy.on('proxyRes', function (proxyRes, req, res) {
+        res.setHeader('X-Server-URL', server.url);
+    });
+    proxy.web(req, res, { target: healthyServer.url, changeOrigin: true});
     res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
 
+});
+
+proxy.on('proxyReq', (proxyReq, req) => {
+    if (req.body) {
+        const bodyData = JSON.stringify(req.body);
+        // incase if content-type is application/x-www-form-urlencoded -> we need to change to application/json
+        proxyReq.setHeader('Content-Type','application/json');
+        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+        // stream the content
+        proxyReq.write(bodyData);
+    }
 });
 
 function validateYouTubeUrl(urlToParse) {
