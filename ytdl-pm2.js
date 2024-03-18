@@ -26,16 +26,28 @@ require('dotenv').config()
 
     const serverAdapter = new FastifyAdapter();
 
-    const queue = new Queue('yt-dlp-conversion', {
+    const queue = new Queue(process.env.QUEUE_NAME, {
         redis: {
-            host: 'localhost',
+            host: process.env.QUEUE_HOST,
             port: 6379,
-            password: process.env.REDIS_PASSWORD
+            password: process.env.QUEUE_PASSWORD
         },
     });
 
+    let node2 = null;
+
+    if(process.env.MAIN_SERVER) {
+         node2 = new Queue(process.env.QUEUE_NAME_SECONDARY, {
+            redis: {
+                host: process.env.QUEUE_HOST_SECONDARY,
+                port: 6379,
+                password: process.env.QUEUE_PASSWORD_SECONDARY,
+            },
+        });
+    }
+
     createBullBoard({
-        queues: [new BullAdapter(queue)],
+        queues: [new BullAdapter(queue), new BullAdapter(node2)],
         serverAdapter: serverAdapter,
     });
 

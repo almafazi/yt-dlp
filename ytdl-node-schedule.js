@@ -11,11 +11,11 @@ const rmdir = promisify(fs.rmdir);
 cron.schedule('*/1 * * * *', () => {
     const directory = `${__dirname}/converted`; 
 
-    const queue = new Queue('yt-dlp-conversion', {
+    const queue = new Queue(process.env.QUEUE_NAME, {
         redis: {
-            host: 'localhost',
+            host: process.env.QUEUE_HOST,
             port: 6379,
-            password: process.env.REDIS_PASSWORD
+            password: process.env.QUEUE_PASSWORD
         },
     });
 
