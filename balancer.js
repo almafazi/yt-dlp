@@ -50,6 +50,7 @@ app.use(async (req, res, next) => {
             .catch(() => ({ server: s, filePath: null, isFileExists: false }))
     );
     const result = await Promise.race(fileExistPromises);
+    console.log(result);
 
     if (result.isFileExists) {
         res.setHeader('Access-Control-Expose-Headers', 'X-Server-URL');
