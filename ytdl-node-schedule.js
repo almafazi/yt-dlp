@@ -7,6 +7,7 @@ const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 const unlink = promisify(fs.unlink);
 const rmdir = promisify(fs.rmdir);
+require('dotenv').config()
 
 cron.schedule('*/1 * * * *', () => {
     const directory = `${__dirname}/converted`; 
