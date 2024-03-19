@@ -67,10 +67,10 @@ require('dotenv').config()
 
     app.get('/health', async (request, reply) => {
         try {
-            const totalMemory = os.totalmem();
-            const freeMemory = os.freemem();
-            const usedMemory = totalMemory - freeMemory;
-            const memoryUsagePercent = (usedMemory / totalMemory) * 100;
+            // const totalMemory = os.totalmem();
+            // const freeMemory = os.freemem();
+            // const usedMemory = totalMemory - freeMemory;
+            // const memoryUsagePercent = (usedMemory / totalMemory) * 100;
     
             const cpuUsagePromise = new Promise((resolve, reject) => {
                 osUtils.cpuUsage((cpuUsage) => {
@@ -89,16 +89,18 @@ require('dotenv').config()
     
             // Define your thresholds
             const cpuThreshold = 75; // 80% usage
-            const memoryThreshold = 75; // 80% usage
+            const memoryThreshold = 100; // 80% usage
             const diskThreshold = 75; // 80% usage
     
             // Determine health status based on thresholds
             let healthStatus = 'healthy';
             if (cpuUsage * 100 > cpuThreshold) {
                 healthStatus = 'unhealthy';
-            } else if (memoryUsagePercent > memoryThreshold) {
-                healthStatus = 'unhealthy';
-            } else if ((diskUsage.total - diskUsage.free) / diskUsage.total > diskThreshold / 100) {
+            } 
+            // else if (memoryUsagePercent > memoryThreshold) {
+            //     healthStatus = 'unhealthy';
+            // } 
+            else if ((diskUsage.total - diskUsage.free) / diskUsage.total > diskThreshold / 100) {
                 healthStatus = 'unhealthy';
             }
     
@@ -144,7 +146,6 @@ require('dotenv').config()
     });
 
     app.post('/convert', async (request, reply) => {
-        console.log('papa');
         const { youtubeUrl } = request.body;
         const youtubeId = extractYoutubeId(youtubeUrl);
         if (!youtubeUrl) {
@@ -291,6 +292,8 @@ require('dotenv').config()
                 youtubeUrl
             ]);
 
+            let breakTerminal = false;
+
             process.on('exit', (code) => {
                 if (code === 0) {
                     resolve();
@@ -301,7 +304,46 @@ require('dotenv').config()
 
             process.stdout.on('data', (data) => {
                 job.log(data);
-                console.log(`Process output: ${data}`);
+                const progressRegex = /(\d+(\.\d+)?)%/;
+                const match = data.toString().match(progressRegex);
+
+                if (match) {
+                    const percentage = parseFloat(match[1]);
+                    console.log(`Downloading ${percentage}%`);
+                }
+
+                
+                const breakRegex = /\[info\] Encountered a video that did not match filter, stopping due to --break-match-filter/;
+                const breakRegexMatch = data.toString().match(breakRegex);
+                if (breakRegexMatch) {
+                    breakTerminal = true;
+                    console.log(`Error, max video duration is 15 minutes.`);
+                }
+
+                const youtubeRegex = /\[youtube\] (.*)/;
+                const youtubeMatch = data.toString().match(youtubeRegex);
+                if (youtubeMatch) {
+                    console.log(`Getting info...`);
+                }
+
+                const infoRegex = /\[info\] (.*)/;
+                const infoMatch = data.toString().match(infoRegex);
+                if (infoMatch) {
+                    if(breakTerminal == false) {
+                        console.log(`Downloading Thumbnail...`);
+                    }
+                }
+
+                const ExtractAudioRegex = /\[ExtractAudio\] (.*)/;
+                const ExtractAudioMatch = data.toString().match(ExtractAudioRegex);
+                if (ExtractAudioMatch) {
+                    console.log(`Converting...`);
+                }
+                const ThumbnailsConvertorRegex = /\[ThumbnailsConvertor\] (.*)/;
+                const ThumbnailsConvertorMatch = data.toString().match(ThumbnailsConvertorRegex);
+                if (ThumbnailsConvertorMatch) {
+                    console.log(`Starting Download...`);
+                }
             });
 
             process.stderr.on('data', (data) => {

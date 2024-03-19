@@ -9,7 +9,7 @@ const unlink = promisify(fs.unlink);
 const rmdir = promisify(fs.rmdir);
 require('dotenv').config()
 
-cron.schedule('*/1 * * * *', () => {
+cron.schedule('*/3 * * * *', () => {
     const directory = `${__dirname}/converted`; 
 
     const queue = new Queue(process.env.QUEUE_NAME, {

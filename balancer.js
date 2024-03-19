@@ -28,36 +28,23 @@ const servers = [
 
 app.use(cors());
 
-
-async function getHealthyServer(servers) {
-    // Create an array of promises that resolve when a server is healthy
-    const healthCheckPromises = servers.map(server =>
-        axios.get(`${server.url}/health`)
-            .then(response => {
-                
-                if (response.data.healthStatus === 'healthy') {
-                    return server;
+async function healthCheckServer(server) {
+    return new Promise(resolve => {
+        client.get(`${server.url}/health`, async (err, result) => {
+            if (err || result === null) {
+                try {
+                    const response = await axios.get(`${server.url}/health`);
+                    const isHealthy = response.data.healthStatus === 'healthy';
+                    client.set(`${server.url}/health`, isHealthy ? 'healthy' : 'unhealthy', 'EX', 60);
+                    resolve(isHealthy);
+                } catch (error) {
+                    resolve(false);
                 }
-                throw new Error('Server is not healthy');
-            })
-            .catch(error => null)
-    );
-
-    while (healthCheckPromises.length > 0) {
-        // Wait for the fastest promise to resolve
-        const result = await Promise.race(healthCheckPromises);
-
-        // If a server is healthy, return true
-        if (result) {
-            return result;
-        }
-
-        // If a server is not healthy, remove the promise from the array
-        healthCheckPromises.splice(healthCheckPromises.findIndex(p => p === result), 1);
-    }
-
-    // If no server is healthy, return null
-    return null;
+            } else {
+                resolve(result === 'healthy');
+            }
+        });
+    });
 }
 
 async function searchFileOnServers(id, servers) {
@@ -125,7 +112,7 @@ app.use(async (req, res, next) => {
 
     if (serverFromCache) {
         server = servers.find(s => s.url === serverFromCache);
-        const healthCheck = await axios.get(`${server.url}/health`).then(response => response.data.healthStatus === 'healthy').catch(() => false);
+        const healthCheck = await healthCheckServer(server)
         if (!healthCheck) {
             server = null;  // If the server from Redis is not healthy, set server to null
         }
@@ -140,7 +127,7 @@ app.use(async (req, res, next) => {
         for (const s of servers) {
             weightSum += s.weight;
             if (random < weightSum) {
-                const healthCheck = await axios.get(`${s.url}/health`).then(response => response.data.healthStatus === 'healthy').catch(() => false);
+                const healthCheck = await healthCheckServer(s);
                 if (healthCheck) {
                     server = s;
                     break;
@@ -150,7 +137,7 @@ app.use(async (req, res, next) => {
 
         if (!server) {
             // If no server is healthy, reject the request
-            res.status(503).send('Server Penuh');
+            res.status(503).send({'error': 'Server Full'});
             return;
         }
 
