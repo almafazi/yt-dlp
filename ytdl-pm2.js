@@ -309,7 +309,7 @@ require('dotenv').config()
 
                 if (match) {
                     const percentage = parseFloat(match[1]);
-                    console.log(`Downloading ${percentage}%`);
+                    job.progress(`Downloading ${percentage}%`);
                 }
 
                 
@@ -317,32 +317,32 @@ require('dotenv').config()
                 const breakRegexMatch = data.toString().match(breakRegex);
                 if (breakRegexMatch) {
                     breakTerminal = true;
-                    console.log(`Error, max video duration is 15 minutes.`);
+                    job.progress(`Error, max video duration is 15 minutes.`);
                 }
 
                 const youtubeRegex = /\[youtube\] (.*)/;
                 const youtubeMatch = data.toString().match(youtubeRegex);
                 if (youtubeMatch) {
-                    console.log(`Getting info...`);
+                    job.progress(`Getting info...`);
                 }
 
                 const infoRegex = /\[info\] (.*)/;
                 const infoMatch = data.toString().match(infoRegex);
                 if (infoMatch) {
                     if(breakTerminal == false) {
-                        console.log(`Downloading Thumbnail...`);
+                        job.progress(`Downloading Thumbnail...`);
                     }
                 }
 
                 const ExtractAudioRegex = /\[ExtractAudio\] (.*)/;
                 const ExtractAudioMatch = data.toString().match(ExtractAudioRegex);
                 if (ExtractAudioMatch) {
-                    console.log(`Converting...`);
+                    job.progress(`Converting...`);
                 }
                 const ThumbnailsConvertorRegex = /\[ThumbnailsConvertor\] (.*)/;
                 const ThumbnailsConvertorMatch = data.toString().match(ThumbnailsConvertorRegex);
                 if (ThumbnailsConvertorMatch) {
-                    console.log(`Starting Download...`);
+                    job.progress(`Starting Download...`);
                 }
             });
 
