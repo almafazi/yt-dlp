@@ -70,7 +70,10 @@ async function searchFileOnServers(id, servers) {
         }
 
         // If the file was not found, remove the promise from the array
-        fileExistPromises.splice(fileExistPromises.findIndex(p => p === result), 1);
+        const index = fileExistPromises.findIndex(p => p === result);
+        if (index !== -1) {
+            fileExistPromises.splice(index, 1);
+        }
     }
 
     // If the file was not found on any server, continue the proxy
