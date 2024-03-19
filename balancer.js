@@ -68,7 +68,6 @@ async function searchFileOnServers(id, servers) {
                 }
             })
             .catch(error => {
-                console.error(`Error on ${server.url}: ${error.message}`);
                 resolve(null); // Resolve with null for failed requests
             });
     }));
