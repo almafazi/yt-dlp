@@ -28,6 +28,17 @@ const servers = [
 
 app.use(cors());
 
+function selectServer(servers) {
+    const totalWeight = servers.reduce((total, server) => total + server.weight, 0);
+    let choice = Math.random() * totalWeight;
+    for (let server of servers) {
+        choice -= server.weight;
+        if (choice <= 0) {
+            return server;
+        }
+    }
+}
+
 async function healthCheckServer(server) {
     return new Promise(resolve => {
         client.get(`${server.url}/health`, async (err, result) => {
@@ -102,7 +113,6 @@ app.use(async (req, res, next) => {
     }
 
     const id = youtubeId;
-    let server;
 
     const result = await searchFileOnServers(id, servers);
 
@@ -113,47 +123,26 @@ app.use(async (req, res, next) => {
         return;
     }
 
-    // If the file does not exist on any server, run the load balancer
-    const serverFromCache = await new Promise((resolve) => {
-        client.get('server', (err, reply) => {
-            resolve(reply);
-        });
-    });
+    let server = selectServer(servers);
 
-    if (serverFromCache) {
-        server = servers.find(s => s.url === serverFromCache);
-        const healthCheck = await healthCheckServer(server)
-        if (!healthCheck) {
-            server = null;  // If the server from Redis is not healthy, set server to null
-        }
-    }
+    // Check if the server is healthy
+    const healthCheck = await healthCheckServer(server);
 
-    if (!server) {
-        // If the server from Redis is not healthy or doesn't exist, select a new server
-        const totalWeight = servers.reduce((total, server) => total + server.weight, 0);
-        let weightSum = 0;
-        const random = Math.floor(Math.random() * totalWeight);
+    if (!healthCheck) {
+        // Remove the unhealthy server from the array
+        filteredServers = servers.filter(s => s.url !== server.url);
 
-        for (const s of servers) {
-            weightSum += s.weight;
-            if (random < weightSum) {
-                const healthCheck = await healthCheckServer(s);
-                if (healthCheck) {
-                    server = s;
-                    break;
-                }
-            }
-        }
+        // Select another server
+        server = selectServer(filteredServers);
 
-        if (!server) {
-            // If no server is healthy, reject the request
+        const healthCheck = await healthCheckServer(server);
+
+        if(!healthCheck) {
             res.status(503).send({'error': 'Server Full'});
             return;
         }
-
-        client.set('server', server.url, 'EX', 60);  // Cache the new server selection for 60 seconds
     }
-    
+   
     proxy.on('proxyRes', function (proxyRes, req, res) {
         res.setHeader('X-Server-URL', server.url);
     });
