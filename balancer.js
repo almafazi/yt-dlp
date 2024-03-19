@@ -22,8 +22,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const servers = [
-    { url: process.env.URL_1, weight: 53 },
-    { url: process.env.URL_2, weight: 47 }
+    { url: process.env.URL_1, weight: 60 },
+    { url: process.env.URL_2, weight: 40 }
 ];
 
 app.use(cors());
