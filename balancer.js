@@ -48,37 +48,44 @@ async function healthCheckServer(server) {
 }
 
 async function searchFileOnServers(id, servers) {
-    // Create an array of promises that resolve when the file is found
-    const fileExistPromises = servers.map(server =>
+    let fileFound = false;
+
+    // Send requests to both servers simultaneously
+    const promises = servers.map(server =>
         axios.get(`${server.url}/filecheckcdn/${id}`)
             .then(response => {
                 if (response.status === 200) {
-                    return { server: server.url, mp3Path: response.data.mp3Path, exists: true, fromFirstCheck: true};
+                    // If file found on this server, set fileFound flag and return result
+                    fileFound = true;
+                    return {
+                        server: server.url,
+                        mp3Path: response.data.mp3Path,
+                        exists: true,
+                        fromFirstCheck: true
+                    };
                 }
-                throw new Error('Not found on this server');
+                throw new Error(`File not found on ${server.url}`);
             })
-            .catch(error => ({ server: server.url, mp3Path: null, exists: false, fromFirstCheck: true }))
+            .catch(error => {
+                console.error(`Error on ${server.url}: ${error.message}`);
+                return null; // Return null for failed requests
+            })
     );
 
-    while (fileExistPromises.length > 0) {
-        // Wait for the fastest promise to resolve
-        const result = await Promise.race(fileExistPromises);
+    // Wait for all promises to resolve or reject
+    const results = await Promise.all(promises);
 
-        // If the file was found, return the result
-        if (result.exists) {
+    // Find the first successful response and stop further requests
+    for (const result of results) {
+        if (result && result.exists) {
             return result;
-        }
-
-        // If the file was not found, remove the promise from the array
-        const index = fileExistPromises.findIndex(p => p === result);
-        if (index !== -1) {
-            fileExistPromises.splice(index, 1);
         }
     }
 
-    // If the file was not found on any server, continue the proxy
-    return null;
+    // If file not found on any server, return false
+    return false;
 }
+
 
 app.use(async (req, res, next) => {
     const { youtubeUrl } = req.body;
