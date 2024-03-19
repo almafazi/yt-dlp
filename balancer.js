@@ -22,8 +22,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const servers = [
-    { url: process.env.URL_1, weight: 60 },
-    { url: process.env.URL_2, weight: 40 }
+    { url: process.env.URL_1, weight: 53 },
+    { url: process.env.URL_2, weight: 47 }
 ];
 
 app.use(cors());
@@ -51,26 +51,27 @@ async function searchFileOnServers(id, servers) {
     let fileFound = false;
 
     // Send requests to both servers simultaneously
-    const promises = servers.map(server =>
+    const promises = servers.map(server => new Promise((resolve, reject) => {
         axios.get(`${server.url}/filecheckcdn/${id}`)
             .then(response => {
                 if (response.status === 200) {
                     // If file found on this server, set fileFound flag and return result
                     fileFound = true;
-                    return {
+                    resolve({
                         server: server.url,
                         mp3Path: response.data.mp3Path,
                         exists: true,
                         fromFirstCheck: true
-                    };
+                    });
+                } else {
+                    reject(new Error(`File not found on ${server.url}`));
                 }
-                throw new Error(`File not found on ${server.url}`);
             })
             .catch(error => {
                 console.error(`Error on ${server.url}: ${error.message}`);
-                return null; // Return null for failed requests
-            })
-    );
+                resolve(null); // Resolve with null for failed requests
+            });
+    }));
 
     // Wait for all promises to resolve or reject
     const results = await Promise.all(promises);
