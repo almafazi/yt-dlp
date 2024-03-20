@@ -70,21 +70,21 @@ require('dotenv').config()
 
     const allowedDomains = ['https://node1.canehill.info', 'https://node2.canehill.info'];
 
-    app.register(fastifyCors, {
-        origin: '*'
-    });
-
     // app.register(fastifyCors, {
-    // origin: function(origin, callback){
-    //     console.log(origin);
-    //     if(!origin) return callback(null, true);
-    //     if(allowedDomains.indexOf(origin) === -1){
-    //     const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-    //     return callback(new Error(msg), false);
-    //     }
-    //     return callback(null, true);
-    // }
+    //     origin: '*'
     // });
+
+    app.register(fastifyCors, {
+    origin: function(origin, callback){
+        console.log(origin);
+        if(!origin) return callback(null, true);
+        if(allowedDomains.indexOf(origin) === -1){
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+    });
 
     // app.addHook('preHandler', (request, reply, done) => {
     //     // Check if the request is an AJAX request
