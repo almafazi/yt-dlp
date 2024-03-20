@@ -320,7 +320,7 @@ require('dotenv').config()
                 '-f', 'bestaudio/best',
                 '--extract-audio',
                 '--audio-format', 'mp3',
-                '--audio-quality', '192',
+                '--audio-quality', '128',
                 '--embed-thumbnail', // Add this line to enable adding album art
                 '--max-filesize', '50M',
                 '-o', outputPath,
