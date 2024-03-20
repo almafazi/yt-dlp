@@ -46,7 +46,7 @@ async function healthCheckServer(server) {
                 try {
                     const response = await axios.get(`${server.url}/health`);
                     const isHealthy = response.data.healthStatus === 'healthy';
-                    client.set(`${server.url}/health`, isHealthy ? 'healthy' : 'unhealthy', 'EX', 60);
+                    client.set(`${server.url}/health`, isHealthy ? 'healthy' : 'unhealthy', 'EX', 20);
                     resolve(isHealthy);
                 } catch (error) {
                     resolve(false);
