@@ -70,19 +70,35 @@ require('dotenv').config()
 
     const allowedDomains = ['https://node1.canehill.info', 'https://node2.canehill.info'];
 
+    app.register(fastifyCors, {
+        origin: '*'
+    });
+
     // app.register(fastifyCors, {
-    //     origin: '*'
+    // origin: function(origin, callback){
+    //     console.log(origin);
+    //     if(!origin) return callback(null, true);
+    //     if(allowedDomains.indexOf(origin) === -1){
+    //     const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    //     return callback(new Error(msg), false);
+    //     }
+    //     return callback(null, true);
+    // }
     // });
 
-    app.register(fastifyCors, {
-        origin: (origin, cb) => {
-            if (allowedDomains.includes(origin)) {
-                cb(null, true);
-            } else {
-                cb(new Error('Not allowed by CORS'));
-            }
-        }
-    });
+    // app.addHook('preHandler', (request, reply, done) => {
+    //     // Check if the request is an AJAX request
+    //     if (request.headers['x-requested-with'] !== 'XMLHttpRequest' && request.headers['x-requested-with'] !== undefined){
+    //         // Check if the request is coming from the load balancer
+    //         const loadBalancerIp = process.env.LOAD_BALANCER_IP;
+    //         const clientIp = request.headers['x-forwarded-for'] || request.ip;
+    //         if (clientIp !== loadBalancerIp) {
+    //             reply.code(403).send('This API can only be accessed via AJAX or the load balancer.');
+    //             return;
+    //         }
+    //     }
+    //     done();
+    // });
 
     serverAdapter.setBasePath('/bull-queue-2024');
     app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
