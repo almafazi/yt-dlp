@@ -8,6 +8,7 @@ const stat = promisify(fs.stat);
 const unlink = promisify(fs.unlink);
 const rmdir = promisify(fs.rmdir);
 require('dotenv').config()
+const checkDiskSpace = require('check-disk-space').default
 
 cron.schedule('*/5 * * * * *', () => {
     const directory = `${__dirname}/converted`; 
@@ -19,7 +20,6 @@ cron.schedule('*/5 * * * * *', () => {
             password: process.env.QUEUE_PASSWORD
         },
     });
-    console.log('test');
 
     checkDiskSpace('/').then( async (diskSpace) => {
         const freeSpaceInPercent = Math.round((diskSpace.free / diskSpace.size) * 100);
