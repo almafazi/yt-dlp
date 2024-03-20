@@ -10,7 +10,7 @@ const rmdir = promisify(fs.rmdir);
 require('dotenv').config()
 const checkDiskSpace = require('check-disk-space').default
 
-cron.schedule('*/5 * * * * *', () => {
+cron.schedule('*/5 * * * *', () => {
     const directory = `${__dirname}/converted`; 
 
     const queue = new Queue(process.env.QUEUE_NAME, {
@@ -23,7 +23,6 @@ cron.schedule('*/5 * * * * *', () => {
 
     checkDiskSpace('/').then( async (diskSpace) => {
         const freeSpaceInPercent = Math.round((diskSpace.free / diskSpace.size) * 100);
-        console.log({freeSpaceInPercent});
         if(freeSpaceInPercent < 35) {
             const files = await readdir(directory);
             const fileStats = await Promise.all(files.map(file => stat(path.join(directory, file))));
