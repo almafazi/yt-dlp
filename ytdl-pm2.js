@@ -70,6 +70,10 @@ require('dotenv').config()
 
     const allowedDomains = ['https://node1.canehill.info', 'https://node2.canehill.info'];
 
+    app.register(fastifyCors, {
+        origin: '*'
+    });
+
     // app.register(fastifyCors, {
     // origin: function(origin, callback){
     //     console.log(origin);
