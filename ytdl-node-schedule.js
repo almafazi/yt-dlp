@@ -8,6 +8,12 @@ const stat = promisify(fs.stat);
 const unlink = promisify(fs.unlink);
 const rmdir = promisify(fs.rmdir);
 require('dotenv').config()
+const { fdir } = require("fdir");
+
+const api = new fdir().withFullPaths().crawl(`${__dirname}/converted`);
+
+const files = api.sync();
+console.log(files);
 
 cron.schedule('*/3 * * * *', () => {
     const directory = `${__dirname}/converted`; 

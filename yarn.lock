@@ -991,6 +991,11 @@ fastq@^1.17.0, fastq@^1.17.1:
   dependencies:
     reusify "^1.0.4"
 
+fdir@^6.1.1:
+  version "6.1.1"
+  resolved "https://registry.npmjs.org/fdir/-/fdir-6.1.1.tgz"
+  integrity sha512-QfKBVg453Dyn3mr0Q0O+Tkr1r79lOTAKSi9f/Ot4+qVEwxWhav2Z+SudrG9vQjM2aYRMQQZ2/Q1zdA8ACM1pDg==
+
 filelist@^1.0.4:
   version "1.0.4"
   resolved "https://registry.npmjs.org/filelist/-/filelist-1.0.4.tgz"
@@ -1666,6 +1671,11 @@ picomatch@^2.3.1:
   version "2.3.1"
   resolved "https://registry.npmjs.org/picomatch/-/picomatch-2.3.1.tgz"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
+
+picomatch@3.x:
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/picomatch/-/picomatch-3.0.1.tgz"
+  integrity sha512-I3EurrIQMlRc9IaAZnqRR044Phh2DXY+55o7uJ0V+hYZAcQYSuFWsc9q5PvyDHUSCe1Qxn/iBz+78s86zWnGag==
 
 pino-abstract-transport@v1.1.0:
   version "1.1.0"
