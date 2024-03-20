@@ -22,6 +22,7 @@ cron.schedule('*/3 * * * *', () => {
 
     checkDiskSpace('/').then( async (diskSpace) => {
         const freeSpaceInPercent = Math.round((diskSpace.free / diskSpace.size) * 100);
+        console.log({freeSpaceInPercent});
         if(freeSpaceInPercent < 35) {
             const files = await readdir(directory);
             const fileStats = await Promise.all(files.map(file => stat(path.join(directory, file))));
