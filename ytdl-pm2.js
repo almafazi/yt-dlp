@@ -353,7 +353,7 @@ require('dotenv').config()
                 const breakRegexMatch = data.toString().match(breakRegex);
                 if (breakRegexMatch) {
                     breakTerminal = true;
-                    console.log(data);
+                    console.log(data.toString());
                     job.progress(`Error, max video duration is 15 minutes.`);
                 }
 
