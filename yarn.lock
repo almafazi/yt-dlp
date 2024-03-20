@@ -54,6 +54,14 @@
   resolved "https://registry.npmjs.org/@fastify/error/-/error-3.4.1.tgz"
   integrity sha512-wWSvph+29GR783IhmvdwWnN4bUxTD01Vm5Xad4i7i1VuAOItLvbPAb69sb0IQ2N57yprvhNIwAP5B6xfKTmjmQ==
 
+"@fastify/express@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@fastify/express/-/express-1.0.0.tgz"
+  integrity sha512-2hpYuiibXgJCICLC90YAFNbiGkM9x31+2FjtvePeTBjgG5vd8vFwrrgOBElG7oDxciGlcLhecM7D17zoVlnyEQ==
+  dependencies:
+    express "^4.17.1"
+    fastify-plugin "^3.0.0"
+
 "@fastify/fast-json-stringify-compiler@^4.3.0":
   version "4.3.0"
   resolved "https://registry.npmjs.org/@fastify/fast-json-stringify-compiler/-/fast-json-stringify-compiler-4.3.0.tgz"
@@ -428,6 +436,11 @@ body-parser@1.19.0:
     raw-body "2.4.0"
     type-is "~1.6.17"
 
+bottleneck@^2.19.5:
+  version "2.19.5"
+  resolved "https://registry.npmjs.org/bottleneck/-/bottleneck-2.19.5.tgz"
+  integrity sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==
+
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.11.tgz"
@@ -779,7 +792,7 @@ express-rate-limit@^7.2.0:
   resolved "https://registry.npmjs.org/express-rate-limit/-/express-rate-limit-7.2.0.tgz"
   integrity sha512-T7nul1t4TNyfZMJ7pKRKkdeVJWa2CqB8NA1P8BwYaoDI5QSBZARv5oMS43J7b7I5P+4asjVXjb7ONuwDKucahg==
 
-"express@4 || 5 || ^5.0.0-beta.1", express@4.17.1:
+express@^4.17.1, "express@4 || 5 || ^5.0.0-beta.1", express@4.17.1:
   version "4.17.1"
   resolved "https://registry.npmjs.org/express/-/express-4.17.1.tgz"
   integrity sha512-mHJ9O79RqluphRrcw2X/GTh3k9tVv8YcoyY4Kkh4WDMUYKRZUq0h1o0w2rrrxBqM7VoeUVqgb27xlEMXTnYt4g==
@@ -891,6 +904,22 @@ fastify-cors@^6.1.0:
   integrity sha512-QBKz32IoY/iuT74CunRY1XOSpjSTIOh9E3FxulXIBhd0D2vdgG0kDvy0eG6HA/88sRfWHeba43LkGEXPz0Rh8g==
   dependencies:
     fastify-cors-deprecated "npm:fastify-cors@6.0.3"
+    process-warning "^1.0.0"
+
+"fastify-express-deprecated@npm:fastify-express@0.3.3":
+  version "0.3.3"
+  resolved "https://registry.npmjs.org/fastify-express/-/fastify-express-0.3.3.tgz"
+  integrity sha512-1b95R59zUJET/RQg3RaOeHq7DToDaFr1Nslhd/ND+zH2sMUe5/fF4gj4XbFt3Nfteay4hXjCWTBjOKe+KUOlMA==
+  dependencies:
+    express "^4.17.1"
+    fastify-plugin "^3.0.0"
+
+fastify-express@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.npmjs.org/fastify-express/-/fastify-express-0.4.0.tgz"
+  integrity sha512-+GAf9ZNl25Zn5dDxilY45zyFBR6t8WfHqxcjHd1K6dEtZiaGMoc9xDh4VzORQ8NNItFzsMNPy5+UImxAxUAJxg==
+  dependencies:
+    fastify-express-deprecated "npm:fastify-express@0.3.3"
     process-warning "^1.0.0"
 
 fastify-plugin@^3.0.0:
@@ -1412,6 +1441,23 @@ micromatch@^4.0.2:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
+"middie-deprecated@npm:middie@7.0.0":
+  version "7.0.0"
+  resolved "https://registry.npmjs.org/middie/-/middie-7.0.0.tgz"
+  integrity sha512-gAX1DrlTOMsDW6MskZrCJQW1j56I7VHqKFdwGSMtZuIbymye2j89R1juPLLCyEMrx0sZR9EZ+VqnWqOh9KH4PQ==
+  dependencies:
+    fastify-plugin "^3.0.0"
+    path-to-regexp "^6.1.0"
+    reusify "^1.0.4"
+
+middie@^7.1.0:
+  version "7.1.0"
+  resolved "https://registry.npmjs.org/middie/-/middie-7.1.0.tgz"
+  integrity sha512-1Fq0i+nGYlPyVv5pBbnXSdkcQ4in1d9pNv2DMwTKGztsqyAng9PN/PNl4PMhccScEWOvj+HT5QtANsA0AuYHFw==
+  dependencies:
+    middie-deprecated "npm:middie@7.0.0"
+    process-warning "^1.0.0"
+
 mime-db@1.52.0:
   version "1.52.0"
   resolved "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz"
@@ -1605,6 +1651,11 @@ path-scurry@^1.10.1:
   dependencies:
     lru-cache "^9.1.1 || ^10.0.0"
     minipass "^5.0.0 || ^6.0.2 || ^7.0.0"
+
+path-to-regexp@^6.1.0:
+  version "6.2.1"
+  resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-6.2.1.tgz"
+  integrity sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw==
 
 path-to-regexp@0.1.7:
   version "0.1.7"
