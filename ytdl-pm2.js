@@ -312,7 +312,7 @@ require('dotenv').config()
 
     async function convertToMp3(youtubeUrl, outputPath, job) {
         return new Promise((resolve, reject) => {
-            const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
+            const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
                 '--break-match-filters', 'duration <= 950',
                 '-f', 'bestaudio/best',
