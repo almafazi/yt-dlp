@@ -72,6 +72,7 @@ require('dotenv').config()
 
     // app.register(fastifyCors, {
     // origin: function(origin, callback){
+    //     console.log(origin);
     //     if(!origin) return callback(null, true);
     //     if(allowedDomains.indexOf(origin) === -1){
     //     const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
