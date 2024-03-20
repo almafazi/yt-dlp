@@ -218,7 +218,12 @@ require('dotenv').config()
                     }
                 }
 
-                const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, { jobId: youtubeId, removeOnFail: true});
+                const job = await queue.add({ youtubeUrl, outputPath, directoryPath: `./converted/${youtubeId}` }, { jobId: youtubeId, removeOnFail: {
+                    /**
+                     * Maximum age in *seconds* for job to be kept.
+                     */
+                    age: 2 * 60, // keep up to 2 minutes
+                }});
 
                 reply.send({ exists: false, jobId: job.id });
                 return;
