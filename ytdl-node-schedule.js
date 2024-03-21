@@ -8,12 +8,6 @@ const stat = promisify(fs.stat);
 const unlink = promisify(fs.unlink);
 const rmdir = promisify(fs.rmdir);
 require('dotenv').config()
-const { fdir } = require("fdir");
-
-const api = new fdir().withFullPaths().crawl(`${__dirname}/converted`);
-console.log('test');
-const files = api.sync();
-console.log(files);
 
 cron.schedule('*/3 * * * *', () => {
     const directory = `${__dirname}/converted`; 
@@ -30,7 +24,6 @@ cron.schedule('*/3 * * * *', () => {
         const freeSpaceInPercent = Math.round((diskSpace.free / diskSpace.size) * 100);
         if(freeSpaceInPercent < 35) {
             const files = await readdir(directory);
-            console.log(files);
             const fileStats = await Promise.all(files.map(file => stat(path.join(directory, file))));
             const fileStatMap = files.reduce((acc, file, index) => ({ ...acc, [file]: fileStats[index] }), {});
             const sortedFiles = files.sort((a, b) => fileStatMap[a].birthtime - fileStatMap[b].birthtime);
