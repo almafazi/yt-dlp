@@ -84,8 +84,8 @@ app.post('/tiktok', async (request, reply) => {
                 stdout = stderr;
             }
         }
-        if(JSON.parse(stdout)) {
-            await redis.set(url, stdout, 'EX', 1800);
+        if(JSON.parse(stdout)?.id) {
+            await redis.set(url, stdout, 'EX', 259200);
         }
         const info = JSON.parse(stdout);
         const renderedHtml = await getRenderHtml(info, website_url, download_url, menu, webpage_download_url);
