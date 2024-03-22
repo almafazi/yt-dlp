@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const app = express();
 
 app.get('/download', (req, res) => {
-    const dlink = req.query.dlink;
+    const dlink = req.query.link;
     const author = req.query.author;
     if (!dlink || !author) {
         res.status(400).send({ error: 'url parameter is required' });
@@ -18,7 +18,6 @@ app.get('/download', (req, res) => {
 
     const filename = `${author.trim()} ${formattedDate} Snaptik.mp4`;
     const url = decrypt(dlink);
-    console.log(filename);
 
     const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
     const ytDlp = spawn('yt-dlp', ['-f', 'best', '-o', '-', url]);
