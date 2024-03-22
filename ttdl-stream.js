@@ -20,7 +20,7 @@ app.get('/download', (req, res) => {
     const url = decrypt(dlink);
 
     const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
-    const ytDlp = spawn('yt-dlp', ['-f', 'best', '-o', '-', url]);
+    const ytDlp = spawn('./yt-dlp.sh', ['-f', 'best', '-o', '-', url]);
 
     res.setHeader('Content-Type', 'video/mp4');
     res.setHeader('Content-Disposition', 'attachment; filename='+filename);
