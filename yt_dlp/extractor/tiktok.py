@@ -43,6 +43,9 @@ class TikTokBaseIE(InfoExtractor):
         return self._configuration_arg(
             'api_hostname', ['api22-normal-c-useast2a.tiktokv.com'], ie_key=TikTokIE)[0]
 
+    def _isAPIDown():
+        return True
+
     @staticmethod
     def _create_url(user_id, video_id):
         return f'https://www.tiktok.com/@{user_id or "_"}/video/{video_id}'
@@ -716,11 +719,12 @@ class TikTokIE(TikTokBaseIE):
 
     def _real_extract(self, url):
         video_id, user_id = self._match_valid_url(url).group('id', 'user_id')
-        try:
-            return self._extract_aweme_app(video_id)
-        except ExtractorError as e:
-            e.expected = True
-            self.report_warning(f'{e}; trying with webpage')
+        if not TikTokBaseIE._isAPIDown():
+            try:
+                return self._extract_aweme_app(video_id)
+            except ExtractorError as e:
+                e.expected = True
+                self.report_warning(f'{e}; trying with webpage')
 
         url = self._create_url(user_id, video_id)
         webpage = self._download_webpage(url, video_id, headers={'User-Agent': 'Mozilla/5.0'})
