@@ -1,9 +1,16 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 2, // 2 requests per minute
+});
+
+app.use(limiter);
 app.get('/download', (req, res) => {
     const dlink = req.query.link;
     const author = req.query.author;
