@@ -6,13 +6,13 @@ import { renderFile as render_template } from 'ejs';
 import cluster from 'cluster';
 import os from 'os';
 import cors from '@fastify/cors'
+import crypto from 'crypto';
 
 if (cluster.isPrimary) {
     const numWorkers = os.cpus().length;
 
     console.log(`Master ${process.pid} is running`);
 
-    // Fork workers
     for (let i = 0; i < numWorkers; i++) {
         cluster.fork();
     }
@@ -63,15 +63,15 @@ await app.register(cors, {
 });
 
 app.post('/tiktok', async (request, reply) => {
-    const { url, download_url, website_url, menu } = request.body;
-    if (!url || !download_url || !website_url) {
+    const { url, download_url, webpage_download_url, website_url, menu } = request.body;
+    if (!url || !download_url || !website_url || !webpage_download_url) {
         return reply.code(400).send({ error: 'some params required' });
     }
 
     const cachedResult = await redis.get(url);
     if (cachedResult) {
         const info = JSON.parse(cachedResult);
-        const renderedHtml = await getRenderHtml(info, website_url, download_url, menu);
+        const renderedHtml = await getRenderHtml(info, website_url, download_url, menu, webpage_download_url);
         return reply.send({ "html": renderedHtml });
     }
     try {
@@ -84,9 +84,11 @@ app.post('/tiktok', async (request, reply) => {
                 stdout = stderr;
             }
         }
-        await redis.set(url, stdout, 'EX', 1800);
+        if(JSON.parse(stdout)) {
+            await redis.set(url, stdout, 'EX', 1800);
+        }
         const info = JSON.parse(stdout);
-        const renderedHtml = await getRenderHtml(info, website_url, download_url, menu);
+        const renderedHtml = await getRenderHtml(info, website_url, download_url, menu, webpage_download_url);
         return reply.send({ "html": renderedHtml });
 
     } catch (error) {
@@ -94,12 +96,12 @@ app.post('/tiktok', async (request, reply) => {
     }
 });
 
-async function responseParser(info, download_url) {
+async function responseParser(info, download_url, webpage_download_url) {
     const audio = info.audio || [];
     const formats = info.formats || [];
     const photos = info.photos || [];
 
-    if (photos && Array.isArray(photos) && photos.length > 0) {
+    if (photos && Array.isArray(photos) && photos?.length > 0) {
         const wm_video_url = info.url;
         const nwm_video_url = info.url;
 
@@ -118,7 +120,19 @@ async function responseParser(info, download_url) {
 
         return { info, download_data, photos: mappedPhotos };
     } else {
-        const filtered_formats = formats.filter(f => f.format_note.includes("watermarked"));
+
+        const filtered_formats = formats.filter(f => f?.format_note?.includes("watermarked"));
+
+        if(filtered_formats.length == 0) {
+            const download_data = {
+                wm_video_url: webpage_download_url+ "?link=" + encrypt(info?.webpage_url) + "&author=" + info?.channel,
+                nwm_video_url: webpage_download_url + "?link=" + encrypt(info?.webpage_url) + "&author=" + info?.channel,
+                audio_url: webpage_download_url + "?musiclink=" + encrypt(info?.webpage_url) + "&author=" + info?.channel
+            };
+            return { info, download_data };
+        }
+
+
         const sorted_formats = filtered_formats.sort((a, b) => b.width - a.width);
         const selected_format = sorted_formats[0] || null;
         let wm_video_url = selected_format ? selected_format.url : null;
@@ -126,18 +140,17 @@ async function responseParser(info, download_url) {
             wm_video_url = formats[0].url;
         }
 
-        const nwm_format = formats.find(f => !f.format_note.includes("watermarked"));
+        const nwm_format = formats.find(f => !f?.format_note?.includes("watermarked"));
         const nwm_video_url = nwm_format ? nwm_format.url : null;
         if (!nwm_video_url) {
             nwm_video_url = formats[1].url;
         }
 
         const download_data = {
-            wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&author=" + info.creator,
-            nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64') + "&author=" + info.creator,
-            audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&author=" + info.creator
-        };
-
+                wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&author=" + info.creator,
+                nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64') + "&author=" + info.creator,
+                audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&author=" + info.creator
+            };
         return { info, download_data };
     }
 }
@@ -151,14 +164,15 @@ async function extractInfo(url) {
     }
 }
 
-async function getRenderHtml(info, website_url, download_url, menu) {
+async function getRenderHtml(info, website_url, download_url, menu, webpage_download_url) {
 
-    const result = await responseParser(info, download_url);
+    const result = await responseParser(info, download_url, webpage_download_url);
     return await new Promise((resolve, reject) => {
         render_template((result.photos ? 'response/response-photos.ejs' : 'response/response.ejs'), {
             info: result.info,
             nFormatter: nFormatter,
             website_url: website_url,
+            webpage_download_url: webpage_download_url,
             download_data: result.download_data,
             menu: menu,
             download_url: download_url,
@@ -171,6 +185,14 @@ async function getRenderHtml(info, website_url, download_url, menu) {
             }
         });
     });
+}
+
+function encrypt(text) {
+    const key = crypto.scryptSync('encryption key', 'salt', 32);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, Buffer.alloc(16));
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
 }
 
 // Start the server
