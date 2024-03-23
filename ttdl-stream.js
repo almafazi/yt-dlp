@@ -12,31 +12,57 @@ const limiter = rateLimit({
 
 app.use(limiter);
 app.get('/download', (req, res) => {
-    const dlink = req.query.link;
+    const link = req.query.link;
     const author = req.query.author;
-    if (!dlink || !author) {
+    const musiclink = req.query.musiclink;
+
+    if (!link && !musiclink) {
         res.status(400).send({ error: 'url parameter is required' });
         return;
     }
+    if (!author) {
+        res.status(400).send({ error: 'url parameter is required' });
+        return;
+    }
+
+    const dlink = link ? link : musiclink;
 
     const now = new Date(); 
     
     const formattedDate = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()} ${now.getHours()}_${now.getMinutes()}`;
 
-    const filename = `${author.trim()} ${formattedDate} Snaptik.mp4`;
-    const url = decrypt(dlink);
+    if(link) {
+        const filename = `${author.trim()} ${formattedDate} Snaptik.mp4`;
+        const url = decrypt(dlink);
+    
+        const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
+        const ytDlp = spawn('./yt-dlp.sh', ['-f', 'best', '-o', '-', url]);
+    
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Transfer-Encoding', 'Binary');
+        res.setHeader('Content-Disposition', 'attachment; filename='+filename);
+        ytDlp.stdout.pipe(res);
+        ytDlp.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+        });
+    } else if(musiclink) {
+        const filename = `${author.trim()} ${formattedDate} Snaptik.mp3`;
+        const url = decrypt(musiclink);
+    
+        const ytDlp = spawn('./yt-dlp.sh', ['-f', 'mp3', '-o', '-', url]);
+    
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Transfer-Encoding', 'Binary');
+        res.setHeader('Content-Disposition', 'attachment; filename='+filename);
+        ytDlp.stdout.pipe(res);
+        ytDlp.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+        });
+    } else {
+        return res.status(500).send({ error: 'Internal server error' });
+    }
 
-    const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
-    const ytDlp = spawn('./yt-dlp.sh', ['-f', 'best', '-o', '-', url]);
-
-    res.setHeader('Content-Type', 'video/mp4');
-    res.setHeader('Content-Transfer-Encoding', 'Binary');
-    res.setHeader('Content-Disposition', 'attachment; filename='+filename);
-
-    ytDlp.stdout.pipe(res);
-    ytDlp.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
+    
 });
 
 function decrypt(text) {

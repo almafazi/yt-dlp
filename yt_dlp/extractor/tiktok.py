@@ -401,6 +401,14 @@ class TikTokBaseIE(InfoExtractor):
                 'height': height,
             })
 
+        formats.append({
+                'format_id': 'mp3',
+                'url': traverse_obj(music_info, 'music', 'playUrl'),
+                'ext': 'mp3',
+                'width': 0,
+                'height': 0,
+            })
+
         self._remove_duplicate_formats(formats)
 
         thumbnails = []
