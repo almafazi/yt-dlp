@@ -68,7 +68,11 @@ app.post('/tiktok', async (request, reply) => {
         return reply.code(400).send({ error: 'some params required' });
     }
 
-    const cachedResult = await redis.get(url);
+    const urlObject = new URL(url);
+    urlObject.search = '';
+    const cleanUrl = urlObject.toString();
+
+    const cachedResult = await redis.get(cleanUrl);
     if (cachedResult) {
         const info = JSON.parse(cachedResult);
         const renderedHtml = await getRenderHtml(info, website_url, download_url, menu, webpage_download_url);
@@ -85,7 +89,7 @@ app.post('/tiktok', async (request, reply) => {
             }
         }
         if(JSON.parse(stdout)?.id) {
-            await redis.set(url, stdout, 'EX', 259200);
+            await redis.set(cleanUrl, stdout, 'EX', 259200);
         }
         const info = JSON.parse(stdout);
         const renderedHtml = await getRenderHtml(info, website_url, download_url, menu, webpage_download_url);

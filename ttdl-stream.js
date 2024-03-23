@@ -15,8 +15,9 @@ app.get('/download', (req, res) => {
     const link = req.query.link;
     const author = req.query.author;
     const musiclink = req.query.musiclink;
+    const imglink = req.query.imglink;
 
-    if (!link && !musiclink) {
+    if (!link && !musiclink && !imglink) {
         res.status(400).send({ error: 'url parameter is required' });
         return;
     }
@@ -24,9 +25,7 @@ app.get('/download', (req, res) => {
         res.status(400).send({ error: 'url parameter is required' });
         return;
     }
-
-    const dlink = link ? link : musiclink;
-
+    const dlink = link ? link : (musiclink ? musiclink : imglink);
     const now = new Date(); 
     
     const formattedDate = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()} ${now.getHours()}_${now.getMinutes()}`;
@@ -58,6 +57,15 @@ app.get('/download', (req, res) => {
         ytDlp.stderr.on('data', (data) => {
             console.error(`stderr: ${data}`);
         });
+    } else if(imglink) {
+        const filename = `${author.trim()} ${formattedDate} Snaptik.jpeg`;
+        const url = decrypt(imglink);
+        console.log(imglink)
+    
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.setHeader('Content-Transfer-Encoding', 'Binary');
+        res.setHeader('Content-Disposition', 'attachment; filename='+filename);
+        res.download(url);
     } else {
         return res.status(500).send({ error: 'Internal server error' });
     }
