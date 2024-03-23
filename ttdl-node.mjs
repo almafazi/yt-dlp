@@ -7,6 +7,8 @@ import cluster from 'cluster';
 import os from 'os';
 import cors from '@fastify/cors'
 import crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
 
 if (cluster.isPrimary) {
     const numWorkers = os.cpus().length;
