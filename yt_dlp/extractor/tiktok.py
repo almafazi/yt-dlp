@@ -402,12 +402,12 @@ class TikTokBaseIE(InfoExtractor):
             })
 
         formats.append({
-                'format_id': 'mp3',
-                'url': traverse_obj(music_info, 'music', 'playUrl'),
-                'ext': 'mp3',
-                'width': 0,
-                'height': 0,
-            })
+            'format_id': 'mp3',
+            'url': traverse_obj(music_info, 'music', 'playUrl'),
+            'ext': 'mp3',
+            'width': 0,
+            'height': 0,
+        })
 
         self._remove_duplicate_formats(formats)
 
@@ -419,6 +419,16 @@ class TikTokBaseIE(InfoExtractor):
                 'width': width,
                 'height': height,
             })
+
+        imageLinks = []
+        if 'imagePost' in aweme_detail:
+            images = aweme_detail['imagePost'].get('images')
+            for i in range(len(images)):
+                sel = images[i]["imageURL"]["urlList"]
+                sel = [p for p in sel if ".jpeg?" in p]
+                imageLinks.append({"url": sel[0]})
+        else:
+            imageLinks = []
 
         return {
             'id': video_id,
@@ -445,6 +455,7 @@ class TikTokBaseIE(InfoExtractor):
                 'album': ('album', {str}, {lambda x: x or None}),
                 'artists': ('authorName', {str}, {lambda x: [x] if x else None}),
             }),
+            'photos': imageLinks,
             'audio': {
                 'uri': traverse_obj(music_info, 'music', 'playUrl')
             },
