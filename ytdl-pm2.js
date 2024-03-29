@@ -242,7 +242,7 @@ require('dotenv').config()
         // Send the file
         reply.header('Content-Length', fs.statSync(filePath).size);
         reply.header('Content-Transfer-Encoding', 'binary');
-        return reply.download(filePath, fileName);
+        return reply.download(filePath, process.env.FILENAME_PREFIX+fileName);
     });
 
     app.get('/download/:jobId', async (request, reply) => {

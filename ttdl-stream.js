@@ -2,7 +2,7 @@ const express = require('express');
 const { spawn } = require('child_process');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
-
+require('dotenv').config();
 const app = express();
 
 const limiter = rateLimit({
@@ -31,7 +31,7 @@ app.get('/download', (req, res) => {
     const formattedDate = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()} ${now.getHours()}_${now.getMinutes()}`;
 
     if(link) {
-        const filename = `${author.trim()} ${formattedDate} Snaptik.mp4`;
+        const filename = `${process.env.FILENAME_PREFIX}${author.trim()} ${formattedDate}.mp4`;
         const url = decrypt(dlink);
     
         const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
@@ -45,7 +45,7 @@ app.get('/download', (req, res) => {
             console.error(`stderr: ${data}`);
         });
     } else if(musiclink) {
-        const filename = `${author.trim()} ${formattedDate} Snaptik.mp3`;
+        const filename = `${process.env.FILENAME_PREFIX}${author.trim()} ${formattedDate}.mp3`;
         const url = decrypt(musiclink);
     
         const ytDlp = spawn('./yt-dlp.sh', ['-f', 'mp3', '-o', '-', url]);
@@ -58,7 +58,7 @@ app.get('/download', (req, res) => {
             console.error(`stderr: ${data}`);
         });
     } else if(imglink) {
-        const filename = `${author.trim()} ${formattedDate} Snaptik.jpeg`;
+        const filename = `${process.env.FILENAME_PREFIX}${author.trim()} ${formattedDate}.jpeg`;
         const url = decrypt(imglink);
         console.log(imglink)
     
