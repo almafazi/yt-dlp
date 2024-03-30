@@ -146,10 +146,9 @@ app.get('/download', (req, res) => {
 
     const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
 
-    const command = `yt-dlp -f ${parsedData.id} --no-warning --dump-json --proxy ${proxyUrl} ${parsedData.vid}`;
+    const command = `./yt-dlp.sh -f ${parsedData.id} --no-warning --dump-json --proxy ${proxyUrl} ${parsedData.vid}`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.log(error);
             return res.json({
                 c_status: "FAILED",
                 mess: "Sorry! An error has occurred exec.",
