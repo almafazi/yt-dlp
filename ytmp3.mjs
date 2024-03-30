@@ -151,7 +151,7 @@ app.get('/download', (req, res) => {
         if (error) {
             return res.json({
                 c_status: "FAILED",
-                mess: "Sorry! An error has occurred.",
+                mess: "Sorry! An error has occurred exec.",
                 status: "ok"
             });
         }
@@ -286,6 +286,8 @@ app.post('/fetch', (req, res) => {
                 } else if (format.vcodec !== 'none' && format.acodec === 'none' && format.ext !== 'mhtml') {
                     // The format is a video format that doesn't contain audio and is not mhtml
                     category = 'other';
+                } else {
+                    category = 'undefined';
                 }
             
                 // Initialize response.links[category] if it's undefined
