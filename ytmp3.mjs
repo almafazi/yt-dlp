@@ -143,8 +143,8 @@ app.get('/download', (req, res) => {
             status: "ok"
         });
     }
-
-    const command = `yt-dlp -f ${parsedData.id} --dump-json ${parsedData.vid}`;
+    const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
+    const command = `yt-dlp -f ${parsedData.id} --dump-json --proxy ${proxyUrl} ${parsedData.vid}`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
             return res.json({
@@ -203,7 +203,7 @@ app.post('/process', async (req, res) => {
 
 
 app.post('/fetch', (req, res) => {
-    const { k_query } = req.body;
+    let { k_query } = req.body;
     const url = k_query;
 
     k_query = YouTubeVideoId(k_query);
@@ -217,7 +217,8 @@ app.post('/fetch', (req, res) => {
 
     client.get(k_query, (error, result) => {
         // Get YouTube video information
-        exec(`./yt-dlp.sh --dump-json ${url}`, (error, stdout, stderr) => {
+        const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
+        exec(`./yt-dlp.sh --dump-json --proxy ${proxyUrl} ${url}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
                 return res.status(200).json({
