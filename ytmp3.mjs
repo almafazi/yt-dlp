@@ -149,6 +149,7 @@ app.get('/download', (req, res) => {
     const command = `yt-dlp -f ${parsedData.id} --no-warning --dump-json --proxy ${proxyUrl} ${parsedData.vid}`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
+            console.log(error);
             return res.json({
                 c_status: "FAILED",
                 mess: "Sorry! An error has occurred exec.",
