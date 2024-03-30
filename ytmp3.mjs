@@ -143,8 +143,10 @@ app.get('/download', (req, res) => {
             status: "ok"
         });
     }
+
     const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
-    const command = `yt-dlp -f ${parsedData.id} --dump-json --proxy ${proxyUrl} ${parsedData.vid}`;
+
+    const command = `yt-dlp -f ${parsedData.id} --no-warning --dump-json --proxy ${proxyUrl} ${parsedData.vid}`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
             return res.json({
@@ -206,7 +208,6 @@ app.post('/fetch', (req, res) => {
     let { k_query } = req.body;
     const url = k_query;
 
-
     if (!validateYouTubeUrl(k_query)) {
         return res.status(200).json({ error: 'Invalid youtubeUrl' });
     }
@@ -217,9 +218,20 @@ app.post('/fetch', (req, res) => {
 
 
     client.get(k_query, (error, result) => {
-        // Get YouTube video information
+        if (error) {
+            console.error(`Error: ${error.message}`);
+            return res.status(200).json({ error: 'An error occurred while accessing the cache' });
+        }
+        if (result) {
+            // If the result exists in cache, return it
+            return res.json(JSON.parse(result));
+        }
+
+        // If 
         const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
-        exec(`./yt-dlp.sh --dump-json --proxy ${proxyUrl} ${url}`, (error, stdout, stderr) => {
+
+        // Get YouTube video information
+        exec(`./yt-dlp.sh --no-warning --dump-json --proxy ${proxyUrl} ${url}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
                 return res.status(200).json({
@@ -288,9 +300,10 @@ app.post('/fetch', (req, res) => {
                     q_text: category === 'other' ? `${format.height}p (Video Only) (.${format.ext})` : format.height ? `${format.height}p (.${format.ext})` : format.abr ? `.${format.ext} (${parseInt(format.abr)} Kbps)` : `.${format.ext} auto quality`,
                     k: encrypt(JSON.stringify({id:format.format_id,ext:format.ext}))
                 };
-            });
-            client.setex(vid, 3600, JSON.stringify(data)); // Cache for 1 hour
 
+            });
+
+            client.setex(k_query, 600, JSON.stringify(response)); // Cache for 1 hour
 
             // Send the response
             res.json(response);
