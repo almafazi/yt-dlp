@@ -206,12 +206,13 @@ app.post('/fetch', (req, res) => {
     let { k_query } = req.body;
     const url = k_query;
 
+
+    if (!validateYouTubeUrl(k_query)) {
+        return res.status(200).json({ error: 'Invalid youtubeUrl' });
+    }
     k_query = YouTubeVideoId(k_query);
         if (!k_query) {
             return res.status(200).json({ error: 'youtubeUrl is required' });
-        }
-        if (!validateYouTubeUrl(k_query)) {
-            return res.status(200).json({ error: 'Invalid youtubeUrl' });
         }
 
 
