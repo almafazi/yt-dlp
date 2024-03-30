@@ -66,7 +66,6 @@ async function checkAndProcessVideo(vid, parsedFormatId) {
 
 app.post('/check', async (req, res) => {
     const { vid, b_id, server } = req.body;
-    console.log(req.body)
     
         axios.get(server+'/check/'+b_id)
             .then(response => {
