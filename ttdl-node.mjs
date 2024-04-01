@@ -75,7 +75,7 @@ app.post('/tiktok', async (request, reply) => {
     const cleanUrl = urlObject.toString();
 
     const cachedResult = await redis.get(cleanUrl);
-    if (!cachedResult) {
+    if (cachedResult) {
         const info = JSON.parse(cachedResult);
         const renderedHtml = await getRenderHtml(info, website_url, download_url, menu, webpage_download_url);
         return reply.send({ "html": renderedHtml });
