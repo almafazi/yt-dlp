@@ -90,6 +90,8 @@ class TikTokBaseIE(InfoExtractor):
         else:  # trill, aweme
             package = f'com.ss.android.ugc.{app_name}/{version}'
         self._APP_USER_AGENT = f'{package} (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)'
+        
+        return True
 
     @staticmethod
     def _create_url(user_id, video_id):
