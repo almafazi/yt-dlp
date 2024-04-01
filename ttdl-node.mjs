@@ -75,7 +75,7 @@ app.post('/tiktok', async (request, reply) => {
     const cleanUrl = urlObject.toString();
 
     const cachedResult = await redis.get(cleanUrl);
-    if (cachedResult) {
+    if (!cachedResult) {
         const info = JSON.parse(cachedResult);
         const renderedHtml = await getRenderHtml(info, website_url, download_url, menu, webpage_download_url);
         return reply.send({ "html": renderedHtml });
@@ -139,17 +139,19 @@ async function responseParser(info, download_url, webpage_download_url) {
         }
 
 
-        const sorted_formats = filtered_formats.sort((a, b) => b.width - a.width);
+        const sorted_formats = filtered_formats.sort((a, b) => (b.width * b.height) - (a.width * a.height));
         const selected_format = sorted_formats[0] || null;
         let wm_video_url = selected_format ? selected_format.url : null;
         if (!wm_video_url) {
             wm_video_url = formats[0].url;
         }
 
-        const nwm_format = formats.find(f => !f?.format_note?.includes("watermarked"));
+        const sortedFormats = formats.sort((a, b) => (b.width * b.height) - (a.width * a.height));
+
+        const nwm_format = sortedFormats.find(f => !f?.format_note?.includes("watermarked"));
         const nwm_video_url = nwm_format ? nwm_format.url : null;
         if (!nwm_video_url) {
-            nwm_video_url = formats[1].url;
+            nwm_video_url = formats[0].url;
         }
 
         const download_data = {
