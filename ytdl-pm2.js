@@ -221,7 +221,7 @@ require('dotenv').config()
     });
 
     app.get('/get-file', async (request, reply) => {
-        const { dlink } = request.query;
+        const { dlink, prefix } = request.query;
 
         // Check if the token has been used or expired
         const check = await client.get(dlink);
@@ -242,7 +242,7 @@ require('dotenv').config()
         // Send the file
         reply.header('Content-Length', fs.statSync(filePath).size);
         reply.header('Content-Transfer-Encoding', 'binary');
-        return reply.download(filePath, process.env.FILENAME_PREFIX+fileName);
+        return reply.download(filePath, prefix+fileName);
     });
 
     app.get('/download/:jobId', async (request, reply) => {
