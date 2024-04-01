@@ -131,9 +131,9 @@ async function responseParser(info, download_url, webpage_download_url) {
 
         if(filtered_formats.length == 0) {
             const download_data = {
-                wm_video_url: webpage_download_url+ "?link=" + encrypt(info?.webpage_url) + "&author=" + info?.channel,
-                nwm_video_url: webpage_download_url + "?link=" + encrypt(info?.webpage_url) + "&author=" + info?.channel,
-                audio_url: webpage_download_url + "?musiclink=" + encrypt(info?.webpage_url) + "&author=" + info?.channel
+                wm_video_url: webpage_download_url+ "?link=" + encrypt(info?.webpage_url) + "&format_id="+formats.find(f => f.format_id == "download")?.format_id+"&author=" + info?.channel,
+                nwm_video_url: webpage_download_url + "?link=" + encrypt(info?.webpage_url) + "&format_id="+formats.find(f => f.format_id != "download" && f.format_id != "mp3")?.format_id+"&author=" + info?.channel,
+                audio_url: webpage_download_url + "?musiclink=" + encrypt(info?.webpage_url) + "&format_id="+formats.find(f => f.format_id == "mp3")?.format_id+"&author=" + info?.channel
             };
             return { info, download_data };
         }
