@@ -165,11 +165,10 @@ async function responseParser(info, download_url, webpage_download_url) {
 async function extractInfo(url) {
     try {
         const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
-        const { stdout, stderr } = await exec(`./yt-dlp.sh --extractor-arg "tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=INFO"
-        --no-warnings --no-check-certificates --skip-download --dump-json --quiet ${proxy} ${url}`);
+        const { stdout, stderr } = await exec(`./yt-dlp.sh --extractor-arg "tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=INFO" --no-warnings --no-check-certificates --skip-download --dump-json --quiet ${proxy} ${url}`);
         return { stdout, stderr };
     } catch (error) {
-        throw error;
+        throw "error";
     }
 }
 
