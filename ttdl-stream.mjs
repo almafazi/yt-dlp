@@ -51,7 +51,6 @@ app.get('/directdownload', async (req, res) => {
     const filename = `${name.trim()} ${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-')}-${crypto.randomBytes(6).toString('hex')}${ext}`;
 
     try {
-        console.log(decryptedUrl)
         // Stream the response from the request directly to the client
         const stream = got.stream(decryptedUrl);
 
@@ -62,6 +61,7 @@ app.get('/directdownload', async (req, res) => {
             res.setHeader('Content-Type', responseStream.headers['content-type']);
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         });
+        console.log(decryptedUrl)
 
         // Pipe the download stream to the response
         stream.pipe(res);
