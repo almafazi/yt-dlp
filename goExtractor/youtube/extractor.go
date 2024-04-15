@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/url"
@@ -89,6 +90,13 @@ func getVideoLink(videoData map[string]interface{}) []map[string]interface{} {
 				}
 			}
 		}
+	}
+
+	filteredFormatsJSON, err := json.MarshalIndent(filteredFormats, "", "    ")
+	if err != nil {
+		fmt.Println("Error marshalling filteredFormats to JSON:", err)
+	} else {
+		fmt.Println("filteredFormats as JSON:", string(filteredFormatsJSON))
 	}
 
 	return filteredFormats

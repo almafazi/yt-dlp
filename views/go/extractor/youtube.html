@@ -25,9 +25,11 @@
             </div> -->
             <div class="def-btn-box">
                 <a title="video format: 720"
-                download="{{ .title }}.{{.ext}}"
+                download="{{ $fulltitle }}.{{.ext}}"
+                data-quality="{{.height}}"
+                data-type="{{.ext}}"
                 class="link link-download subname download-icon" 
-                href="{{ .link }}"
+                href="{{ .url }}&title={{ $fulltitle }}"
                 >Download</a>
             </div>
         </td>
