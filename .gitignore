@@ -80,7 +80,7 @@ tmp/
 venv/
 .venv/
 completions/
-
+vendor
 # Misc
 *~
 *.DS_Store

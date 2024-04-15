@@ -285,13 +285,13 @@ require('dotenv').config()
         return new Promise((resolve, reject) => {
             const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
-                '--break-match-filters', 'duration <= 950',
+                '--break-match-filters', 'duration <= 1800',
                 '-f', 'bestaudio/best',
                 '--extract-audio',
                 '--audio-format', 'mp3',
                 '--audio-quality', '128',
                 '--embed-thumbnail', // Add this line to enable adding album art
-                '--max-filesize', '50M',
+                '--max-filesize', '100M',
                 '-o', outputPath,
                 '--proxy', proxyUrl, // Add this line to set the proxy
                 youtubeUrl

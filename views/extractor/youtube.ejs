@@ -1,0 +1,13 @@
+<% const sortedFilesize = videoData.formats.sort((a, b) => b.filesize - a.filesize); %>
+
+<% sortedFilesize.filter(element => ['webm', 'mp4', 'm4a', '3gp', 'mp3'].includes(element.ext)).forEach(element => { %>
+    <tr>
+        <td><%= element.vcodec === 'none' && element.acodec !== 'none' ? `${element.height}p (Video Only) (.${element.ext})` : element.height ? `${element.height}p (.${element.ext})` : element.abr ? `.${element.ext} (${parseInt(element.abr)} Kbps)` : `.${element.ext} auto quality` %></td>
+        <td><%=  element.filesize ? `${(element.filesize / (1024 * 1024)).toFixed(1)} MB` : element.filesize_approx ? `~ ${(element.filesize_approx / (1024 * 1024)).toFixed(1)} MB` : "~ MB" %></td>
+        <td>
+            <div class="def-btn-box">
+                <a title="video format: 720" class="link link-download subname download-icon" download="Scorpions - Believe In Love.mp4" data-quality="720" data-type="mp4" href="">Download</a>
+            </div>
+        </td>
+    </tr>
+<% }); %>
