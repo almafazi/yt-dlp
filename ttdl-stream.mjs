@@ -51,6 +51,7 @@ app.get('/directdownload', async (req, res) => {
     const filename = `${name.trim()} ${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-')}-${crypto.randomBytes(6).toString('hex')}${ext}`;
 
     try {
+        console.log(decryptedUrl)
         // Stream the response from the request directly to the client
         const stream = got.stream(decryptedUrl);
 
