@@ -25,6 +25,7 @@
     "fastify-redis": "^4.4.0",
     "fdir": "^6.1.1",
     "find-remove": "^4.1.0",
+    "got": "^14.2.1",
     "http-proxy": "^1.18.1",
     "http-proxy-middleware": "^2.0.6",
     "hyper-express": "^6.15.1",
