@@ -46,7 +46,7 @@ app.get('/download', (req, res) => {
         const url = decrypt(dlink);
     
         const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
-        const ytDlp = spawn('./yt-dlp.sh', ['-f', format_id, '--extractor-arg', '"tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=INFO"', '-o', '-', url]);
+        const ytDlp = spawn('./yt-dlp.sh', ['-f', format_id, '--extractor-args', '"tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=7355728856979392262"', '-o', '-', url]);
     
         res.setHeader('Content-Type', 'video/mp4');
         res.setHeader('Content-Transfer-Encoding', 'Binary');
@@ -59,7 +59,7 @@ app.get('/download', (req, res) => {
         const filename = `${process.env.FILENAME_PREFIX}${author.trim()} ${formattedDate}`;
         const url = decrypt(musiclink);
     
-        const ytDlp = spawn('./yt-dlp.sh', ['-f', 'mp3', '--extractor-arg', '"tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=INFO"', '-o', '-', url]);
+        const ytDlp = spawn('./yt-dlp.sh', ['-f', 'mp3', '--extractor-arg', '"tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=7355728856979392262"', '-o', '-', url]);
     
         res.setHeader('Content-Type', 'audio/mpeg');
         res.setHeader('Content-Transfer-Encoding', 'Binary');
