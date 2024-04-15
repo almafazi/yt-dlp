@@ -61,10 +61,10 @@ app.get('/directdownload', async (req, res) => {
             res.setHeader('Content-Type', responseStream.headers['content-type']);
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         });
-        console.log(decryptedUrl)
 
         // Pipe the download stream to the response
         stream.pipe(res);
+        console.log(decryptedUrl)
 
         stream.on('error', (error) => {
             console.error(error);
