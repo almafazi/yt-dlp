@@ -23,7 +23,7 @@ function removeSymbolsAndStrangeLetters(str) {
     return strangeLettersRemoved;
 }
 
-app.use(limiter);
+// app.use(limiter);
 
 app.get('/directdownload', async (req, res) => {
     const encryptedUrl = req.query.link || req.query.musiclink || req.query.imglink; // Assuming the URL is passed as a query parameter
