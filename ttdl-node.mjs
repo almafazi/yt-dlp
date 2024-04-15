@@ -168,7 +168,7 @@ async function extractInfo(url) {
         const { stdout, stderr } = await exec(`./yt-dlp.sh --extractor-args "tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=7355728856979392262" --no-warnings --no-check-certificates --skip-download --dump-json --quiet ${proxy} ${url}`);
         return { stdout, stderr };
     } catch (error) {
-        throw "error";
+        throw error;
     }
 }
 
