@@ -57,7 +57,6 @@ app.get('/directdownload', async (req, res) => {
         // Set headers based on the response from the got stream
         stream.on('response', (responseStream) => {
             res.setHeader('Content-Length', responseStream.headers['content-length']);
-            res.setHeader('Content-Transfer-Encoding', 'Binary');
             res.setHeader('Content-Type', responseStream.headers['content-type']);
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         });
