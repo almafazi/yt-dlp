@@ -48,7 +48,7 @@ app.get('/directdownload', async (req, res) => {
     const decryptedUrl = Buffer.from(encryptedUrl, 'base64').toString('utf8');
 
     // Generate the filename
-    const filename = `${name.trim()} ${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-')}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+    const filename = `${removeSymbolsAndStrangeLetters(name.trim())} ${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-')}-${crypto.randomBytes(6).toString('hex')}${ext}`;
 
     try {
         // Stream the response from the request directly to the client
