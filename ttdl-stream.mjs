@@ -13,6 +13,8 @@ const limiter = rateLimit({
     max: 10, // 2 requests per minute
 });
 
+app.set('trust proxy', true);
+
 function removeSymbolsAndStrangeLetters(str) {
     // Remove symbols
     const symbolsRemoved = str.replace(/[^\w\s]/gi, '');
