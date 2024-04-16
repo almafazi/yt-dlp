@@ -58,7 +58,7 @@ app.get('/directdownload', async (req, res) => {
         stream.on('response', (responseStream) => {
             res.setHeader('Content-Length', responseStream.headers['content-length']);
             res.setHeader('Content-Transfer-Encoding', 'Binary');
-            res.setHeader('Content-Type', responseStream.headers['content-type']);
+            res.setHeader('Content-Type', 'application/octet-stream');
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         });
 
