@@ -5,17 +5,17 @@
 {{range .videoLinks}}
     <tr>
         <td>
-            {{if and (eq .acodec "none") (ne .acodec "none")}}
+            {{if and (eq .acodec "none")}}
                 {{.height}}p (Video Only) (.{{.ext}})
             {{else if .height}}
                 {{.height}}p (.{{.ext}})
             {{else if .Abr}}
                 .{{.ext}} ({{.abr}} Kbps)
             {{else}}
-                .{{.ext}} auto quality
+                .{{.ext}} (auto quality)
             {{end}}
         </td>
-        <td>{{if .filesize}}{{printf "%.1f MB" (div .filesize 1048576)}}{{else}}{{if .filesize_approx}}~ {{printf "%.1f MB" (div .filesize_approx 1048576)}}{{else}}~ MB{{end}}{{end}}</td>
+        <td>{{if .filesize}}{{printf "%.1f MB" (div .filesize 1048576)}}{{else}}{{if .filesize_approx}} {{printf "%.1f MB" (div .filesize_approx 1048576)}}{{else}}~ MB{{end}}{{end}}</td>
         <td>
             <!-- <div class="def-btn-box">
                 <a title="video format: 720"
@@ -24,7 +24,7 @@
                 >Download</a>
             </div> -->
             <div class="def-btn-box">
-                <a title="video format: 720"
+                <a title="video format: {{.height}}"
                 download="{{ $fulltitle }}.{{.ext}}"
                 data-quality="{{.height}}"
                 data-type="{{.ext}}"

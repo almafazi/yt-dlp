@@ -13,6 +13,7 @@ import (
 	"sf/goExtractor/instagram"
 	"sf/goExtractor/tiktok"
 	"sf/goExtractor/youtube"
+	tiktokRoute "sf/goRoute/TiktokRoute"
 	"sf/goRoute/instagramRoute"
 	"sf/goRoute/youtubeRoute"
 	"sf/goUtils/utils"
@@ -43,7 +44,13 @@ func handler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	cmd := exec.Command("python3", "-Werror", "-Xdev", scriptPath, "--no-warnings", "--no-check-certificates", "--skip-download", "--dump-json", "--quiet", url)
+	var cmd *exec.Cmd
+
+	if utils.IsTikTokLink(url) {
+		cmd = exec.Command("python3", "-Werror", "-Xdev", scriptPath, "--no-warnings", "--no-check-certificates", "--skip-download", "--dump-json", "--quiet", "--extractor-args", "tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=7355728856979392262", url)
+	} else {
+		cmd = exec.Command("python3", "-Werror", "-Xdev", scriptPath, "--no-warnings", "--no-check-certificates", "--skip-download", "--dump-json", "--quiet", url)
+	}
 	out, err := cmd.Output()
 	if err != nil {
 		fmt.Println(out)
@@ -89,6 +96,7 @@ func main() {
 
 	instagramRoute.RegisterInstagramRoutes(router)
 	youtubeRoute.RegisterYoutubeRoutes(router)
+	tiktokRoute.RegisterTiktokRoutes(router)
 
 	log.Fatal(fasthttp.ListenAndServe(":3333", router.Handler))
 }

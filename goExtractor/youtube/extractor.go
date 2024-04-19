@@ -62,14 +62,19 @@ func getVideoLink(videoData map[string]interface{}) []map[string]interface{} {
 	// Sort formats by filesize
 	sort.Slice(formatsSlice, func(i, j int) bool {
 		filesizeI, okI := formatsSlice[i]["filesize"].(float64)
-		filesizeJ, okJ := formatsSlice[j]["filesize"].(float64)
-
-		// Handle null values by treating them as the smallest possible value
-		if !okI {
-			filesizeI = -1
+		if !okI { // If 'filesize' does not exist, try 'filesize_approx'
+			filesizeI, okI = formatsSlice[i]["filesize_approx"].(float64)
+			if !okI {
+				filesizeI = -1 // Use -1 if neither exists, to ensure it sorts correctly
+			}
 		}
-		if !okJ {
-			filesizeJ = -1
+
+		filesizeJ, okJ := formatsSlice[j]["filesize"].(float64)
+		if !okJ { // If 'filesize' does not exist, try 'filesize_approx'
+			filesizeJ, okJ = formatsSlice[j]["filesize_approx"].(float64)
+			if !okJ {
+				filesizeJ = -1 // Use -1 if neither exists, to ensure it sorts correctly
+			}
 		}
 
 		// Descending order
@@ -83,9 +88,14 @@ func getVideoLink(videoData map[string]interface{}) []map[string]interface{} {
 	for _, format := range formatsSlice {
 		if ext, ok := format["ext"].(string); ok && allowedExtensions[ext] {
 			if protocol, ok := format["protocol"].(string); ok && protocol == "https" {
-				heightExt := fmt.Sprintf("%v.%s", format["height"], ext)
-				if _, exists := uniqueFormats[heightExt]; !exists {
-					uniqueFormats[heightExt] = true
+				// Include 'acodec' in the uniqueness check
+				acodec, okAcodec := format["acodec"].(string)
+				if !okAcodec {
+					acodec = "none" // Use a placeholder if 'acodec' is not present
+				}
+				heightExtAcodec := fmt.Sprintf("%v.%s.%s", format["height"], ext, acodec) // Now includes 'acodec'
+				if _, exists := uniqueFormats[heightExtAcodec]; !exists {
+					uniqueFormats[heightExtAcodec] = true
 					filteredFormats = append(filteredFormats, format)
 				}
 			}

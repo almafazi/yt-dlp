@@ -15,3 +15,9 @@ func IsInstagramURL(url string) bool {
 
 	return re.MatchString(url)
 }
+
+func IsTikTokLink(url string) bool {
+	pattern := `^.*https:\/\/(?:m|www|vm)?\.?tiktok\.com\/((?:.*\b(?:(?:usr|v|embed|user|photo|photos|video)\/|\?shareId=|\&item_id=)(\d+))|\w+)`
+	matched, _ := regexp.MatchString(pattern, url)
+	return matched
+}

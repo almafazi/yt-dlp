@@ -1,3 +1,4 @@
+{{$downloadBaseUrl := .downloadBaseUrl}}
 <tr>
     <td>Watermark</td>
     <td>
@@ -13,7 +14,9 @@
     </td>
     <td>
         <div class="def-btn-box">
-            <a title="video format: 720" class="link link-download subname download-icon" download="Scorpions - Believe In Love.mp4" data-quality="720" data-type="mp4" href="">Download</a>
+            {{ $wm_format := videoLink . "watermarked"}}
+
+            <a class="link link-download subname download-icon" href="{{$downloadBaseUrl}}?link={{encrypt $wm_format.url}}&type=normal&author={{ .creator }}&format=mp4">Download</a>
         </div>
     </td>
 </tr>
@@ -32,7 +35,9 @@
     </td>
     <td>
         <div class="def-btn-box">
-            <a title="video format: 720" class="link link-download subname download-icon" download="Scorpions - Believe In Love.mp4" data-quality="720" data-type="mp4" href="">Download</a>
+            {{ $nwm_format := videoLink . "nowatermarked"}}
+
+            <a class="link link-download subname download-icon" href="{{$downloadBaseUrl}}?link={{encrypt $nwm_format.url}}&type=normal&author={{ .creator }}&format=mp4">Download</a>
         </div>
     </td>
 </tr>
@@ -42,7 +47,7 @@
     <td>~ MB</td>
     <td>
         <div class="def-btn-box">
-            <a title="video format: 720" class="link link-download subname download-icon" download="Scorpions - Believe In Love.mp4" data-quality="720" data-type="mp4" href="">Download</a>
+            <a class="link link-download subname download-icon" href="{{$downloadBaseUrl}}?musiclink={{encrypt .audio.uri}}&type=normal&author={{ .creator }}&format=mp3">Download</a>
         </div>
     </td>
 </tr>
