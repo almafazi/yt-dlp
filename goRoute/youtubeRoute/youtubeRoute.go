@@ -6,10 +6,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os/exec"
 
-	"github.com/buaazp/fasthttprouter"
-	"github.com/valyala/fasthttp"
 	"golang.org/x/crypto/scrypt"
 )
 
@@ -48,7 +48,6 @@ func decrypt(encryptedText string) (string, error) {
 	return string(plaintext), nil
 }
 
-// unpad removes PKCS#7 padding from the plaintext.
 func unpad(plaintext []byte) ([]byte, error) {
 	length := len(plaintext)
 	padLen := int(plaintext[length-1])
@@ -63,13 +62,12 @@ func unpad(plaintext []byte) ([]byte, error) {
 	return plaintext[:length-padLen], nil
 }
 
-func downloadHandler(ctx *fasthttp.RequestCtx) {
-	link := string(ctx.QueryArgs().Peek("link"))
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	link := r.URL.Query().Get("link")
 
 	decryptedLink, err := decrypt(link)
 	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.SetBodyString("Failed to decrypt link")
+		http.Error(w, "Failed to decrypt link", http.StatusInternalServerError)
 		return
 	}
 
@@ -79,8 +77,7 @@ func downloadHandler(ctx *fasthttp.RequestCtx) {
 	}
 	err = json.Unmarshal([]byte(decryptedLink), &parsedData)
 	if err != nil || parsedData.ID == "" || parsedData.Vid == "" {
-		ctx.SetStatusCode(fasthttp.StatusBadRequest)
-		ctx.SetBodyString("Invalid data")
+		http.Error(w, "Invalid data", http.StatusBadRequest)
 		return
 	}
 
@@ -90,8 +87,7 @@ func downloadHandler(ctx *fasthttp.RequestCtx) {
 	cmd := exec.Command("bash", "-c", command)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.SetBodyString("Failed to execute command")
+		http.Error(w, "Failed to execute command", http.StatusInternalServerError)
 		return
 	}
 
@@ -102,32 +98,26 @@ func downloadHandler(ctx *fasthttp.RequestCtx) {
 	}
 	err = json.Unmarshal(output, &videoInfo)
 	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.SetBodyString("Failed to parse video info")
+		http.Error(w, "Failed to parse video info", http.StatusInternalServerError)
 		return
 	}
 
 	// Set headers to force download
-	ctx.Response.Header.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.%s", videoInfo.Title, videoInfo.Format))
-	ctx.Response.Header.Set("Content-Type", fmt.Sprintf("video/%s", videoInfo.Format))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.%s", videoInfo.Title, videoInfo.Format))
+	w.Header().Set("Content-Type", fmt.Sprintf("video/%s", videoInfo.Format))
 
 	// Fetch and stream the video
-	resp := fasthttp.AcquireResponse()
-	client := &fasthttp.Client{}
-	req := fasthttp.AcquireRequest()
-	req.SetRequestURI(videoInfo.URL)
-	err = client.Do(req, resp)
+	resp, err := http.Get(videoInfo.URL)
 	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.SetBodyString("Failed to fetch video")
+		http.Error(w, "Failed to fetch video", http.StatusInternalServerError)
 		return
 	}
-	ctx.Write(resp.Body())
-	fasthttp.ReleaseRequest(req)
-	fasthttp.ReleaseResponse(resp)
+	defer resp.Body.Close()
+	if _, err := io.Copy(w, resp.Body); err != nil {
+		http.Error(w, "Failed to stream video", http.StatusInternalServerError)
+	}
 }
 
-func RegisterYoutubeRoutes(router *fasthttprouter.Router) {
-	router.GET("/youtube/downloadurl", downloadHandler)
-
+func RegisterYoutubeRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/youtube/downloadurl", downloadHandler)
 }

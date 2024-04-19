@@ -2,6 +2,7 @@ package facebook
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"sort"
@@ -33,14 +34,11 @@ func getVideoLink(videoData map[string]interface{}) []interface{} {
 }
 
 func Extract(videoData map[string]interface{}) (string, error) {
-	tmpl, err := template.New("sf.html").Funcs(template.FuncMap{
+	tmpl, err := template.New("facebook.html").Funcs(template.FuncMap{
 		"formatDuration": formatDuration,
 		"videoLink":      getVideoLink,
 		"div":            div,
 	}).ParseFiles(
-		"views/go/sf.html",
-		"views/go/extractor/youtube.html",
-		"views/go/extractor/tiktok.html",
 		"views/go/extractor/facebook.html")
 
 	if err != nil {
@@ -50,6 +48,9 @@ func Extract(videoData map[string]interface{}) (string, error) {
 	videoData["videoLinks"] = getVideoLink(videoData)
 
 	var htmlContent bytes.Buffer
+
+	videoDataJSON, _ := json.MarshalIndent(videoData, "", "  ")
+	fmt.Println(string(videoDataJSON))
 	err = tmpl.Execute(&htmlContent, videoData)
 	if err != nil {
 		return "", err

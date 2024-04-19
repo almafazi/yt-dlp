@@ -6,11 +6,11 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io"
+	"net/http"
 	"regexp"
 	"time"
 
-	"github.com/buaazp/fasthttprouter"
-	"github.com/valyala/fasthttp"
 	"golang.org/x/crypto/scrypt"
 )
 
@@ -74,34 +74,32 @@ func unpad(plaintext []byte) ([]byte, error) {
 	return plaintext[:length-padLen], nil
 }
 
-func downloadHandler(ctx *fasthttp.RequestCtx) {
-	videotype := string(ctx.QueryArgs().Peek("type"))
-	encryptedUrl := string(ctx.QueryArgs().Peek("link"))
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	videotype := r.URL.Query().Get("type")
+	encryptedUrl := r.URL.Query().Get("link")
 	if encryptedUrl == "" {
-		encryptedUrl = string(ctx.QueryArgs().Peek("musiclink"))
+		encryptedUrl = r.URL.Query().Get("musiclink")
 	}
 	if encryptedUrl == "" {
-		encryptedUrl = string(ctx.QueryArgs().Peek("imglink"))
+		encryptedUrl = r.URL.Query().Get("imglink")
 	}
-	name := string(ctx.QueryArgs().Peek("author"))
+	name := r.URL.Query().Get("author")
 
 	if videotype == "normal" {
 		var ext string
-		if ctx.QueryArgs().Has("musiclink") {
+		if _, ok := r.URL.Query()["musiclink"]; ok {
 			ext = ".mp3"
-		} else if ctx.QueryArgs().Has("imglink") {
+		} else if _, ok := r.URL.Query()["imglink"]; ok {
 			ext = ".jpg"
-		} else if ctx.QueryArgs().Has("link") {
+		} else if _, ok := r.URL.Query()["link"]; ok {
 			ext = ".mp4"
 		} else {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			ctx.SetBodyString("error")
+			http.Error(w, "error", http.StatusBadRequest)
 			return
 		}
 
 		if encryptedUrl == "" || name == "" {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			ctx.SetBodyString("Missing url or name parameter")
+			http.Error(w, "Missing url or name parameter", http.StatusBadRequest)
 			return
 		}
 
@@ -109,8 +107,7 @@ func downloadHandler(ctx *fasthttp.RequestCtx) {
 		randomBytes := make([]byte, 6)
 		_, err := rand.Read(randomBytes)
 		if err != nil {
-			ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-			ctx.SetBodyString("Failed to generate random bytes")
+			http.Error(w, "Failed to generate random bytes", http.StatusInternalServerError)
 			return
 		}
 		filename := fmt.Sprintf("%s %s-%s%s",
@@ -122,42 +119,29 @@ func downloadHandler(ctx *fasthttp.RequestCtx) {
 
 		decryptedUrl, err := decrypt(encryptedUrl)
 		if err != nil {
-			ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-			ctx.SetBodyString("Failed to decrypt link")
+			http.Error(w, "Failed to decrypt link", http.StatusInternalServerError)
 			return
 		}
-
-		decryptedUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 
 		// Make a request to the decrypted URL
-		req := fasthttp.AcquireRequest()
-		defer fasthttp.ReleaseRequest(req) // Ensure resources are released
-		req.SetRequestURI(decryptedUrl)
-
-		resp := fasthttp.AcquireResponse()
-		defer fasthttp.ReleaseResponse(resp) // Ensure resources are released
-
-		// Perform the request
-		err = fasthttp.Do(req, resp)
+		resp, err := http.Get(decryptedUrl)
 		if err != nil {
-			ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-			ctx.SetBodyString("An error occurred while processing your request.")
+			http.Error(w, "An error occurred while processing your request.", http.StatusInternalServerError)
 			return
 		}
+		defer resp.Body.Close()
 
 		// Set headers based on the response
-		ctx.Response.Header.Set("Content-Length", fmt.Sprintf("%d", len(resp.Body())))
-		ctx.Response.Header.Set("Content-Transfer-Encoding", "Binary")
-		ctx.Response.Header.Set("Content-Type", "application/octet-stream")
-		ctx.Response.Header.Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+		w.Header().Set("Content-Length", resp.Header.Get("Content-Length"))
+		w.Header().Set("Content-Transfer-Encoding", "Binary")
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 
 		// Write the body to the client response
-		ctx.Write(resp.Body())
-
+		io.Copy(w, resp.Body)
 	}
-
 }
 
-func RegisterTiktokRoutes(router *fasthttprouter.Router) {
-	router.GET("/tiktok/downloadurl", downloadHandler)
+func RegisterTiktokRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/tiktok/downloadurl", downloadHandler)
 }

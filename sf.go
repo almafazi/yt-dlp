@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os/exec"
-
-	"github.com/buaazp/fasthttprouter"
-	"github.com/valyala/fasthttp"
 
 	"sf/goExtractor/facebook"
 	"sf/goExtractor/instagram"
@@ -21,26 +19,26 @@ import (
 
 var scriptPath = "yt_dlp/__main__.py"
 
-func handler(ctx *fasthttp.RequestCtx) {
-	ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
-	ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+func handler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
-	url := string(ctx.QueryArgs().Peek("url"))
+	url := r.URL.Query().Get("url")
 	if url == "" {
-		ctx.Error("URL is required", fasthttp.StatusBadRequest)
+		http.Error(w, "URL is required", http.StatusBadRequest)
 		return
 	}
 
 	if utils.IsInstagramURL(url) {
 		jsonResponse, err := instagram.Extract(url)
 		if err != nil {
-			ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		ctx.SetContentType("application/json")
-		ctx.Write(jsonResponse)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResponse)
 		return
 	}
 
@@ -53,8 +51,8 @@ func handler(ctx *fasthttp.RequestCtx) {
 	}
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Println(out)
-		ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+		fmt.Println(string(out))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -62,7 +60,7 @@ func handler(ctx *fasthttp.RequestCtx) {
 
 	err = json.Unmarshal(out, &videoData)
 	if err != nil {
-		ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -77,26 +75,27 @@ func handler(ctx *fasthttp.RequestCtx) {
 	}
 
 	if err != nil {
-		ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	jsonResponse, err := json.Marshal(map[string]string{"html": minifiedHTML})
 	if err != nil {
-		ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	ctx.SetContentType("application/json")
-	ctx.Write(jsonResponse)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
 }
 
 func main() {
-	router := fasthttprouter.New()
-	router.GET("/fetch", handler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/fetch", handler)
 
-	instagramRoute.RegisterInstagramRoutes(router)
-	youtubeRoute.RegisterYoutubeRoutes(router)
-	tiktokRoute.RegisterTiktokRoutes(router)
+	// Register routes for Instagram, YouTube, and TikTok
+	instagramRoute.RegisterInstagramRoutes(mux)
+	youtubeRoute.RegisterYoutubeRoutes(mux)
+	tiktokRoute.RegisterTiktokRoutes(mux)
 
-	log.Fatal(fasthttp.ListenAndServe(":3333", router.Handler))
+	log.Fatal(http.ListenAndServe(":3333", mux))
 }
