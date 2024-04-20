@@ -1,0 +1,45 @@
+<div class="media-result">
+
+    {% if videoLinks %}
+
+        {% set imageBaseUrl = imageBaseUrl %} <!-- Store the outer variable for access inside the range -->
+        {% set downloadBaseUrl = downloadBaseUrl %}
+            {% for videoLink in videoLinks %}
+            <div class="result-box video" data-hid="instagram.com">
+            <div class="thumb-box thumb-272 ">
+                <a href="#" class="clip" data-player-id="video_player_1712268378061_3591">
+                <img src="{{ imageBaseUrl }}?url={{ encrypt(videoLink.display_url) }}" class="thumb">
+                {% if videoLink.video_url %}
+                <span class="play-btn"></span>
+                {% endif %}
+                </a>
+            </div>
+            <div class="info-box">
+                <div class="meta">
+                <div class="row title" title="{{ videoLink.description }}">{{ videoLink.description }}</div>
+                    {% if videoLink.date %}
+                        <div class="row duration" title="">
+                        {{ videoLink.date }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="link-box single">
+                    <div class="def-btn-box">
+                        {% if videoLink.video_url %}
+                        <a download="" class="link link-download ga_track_events download-icon" href="{{ downloadBaseUrl }}?vidurl={{ encrypt(videoLink.video_url) }}&fullname={{ urlencode(videoLink.username) }}">Download Video</a>
+                        {% else %}
+                        <a download="" class="link link-download ga_track_events download-icon" href="{{ downloadBaseUrl }}?imgurl={{ encrypt(videoLink.display_url) }}&fullname={{ urlencode(videoLink.username) }}">Download Photo</a>
+                        {% endif %}
+                    </div><div class="drop-down-box">
+                    </div><div class="def-file-info"></div>
+                  </div>
+            </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class=" sf-helper extra" data-href="/user.php?vid=312&amp;utm_source=savefrom&amp;utm_medium=vidacha&amp;utm_campaign=sf_helper&amp;utm_content=all-promo" data-ga-event="send;event;vidacha;helper-promo-click;all" style="">
+      <div class="center">
+        <img src="../assets/build/img/extension/icon_32.png" alt="">&nbsp; Kami menyarankan Anda memasang <a href="/user.php?vid=312&amp;utm_source=savefrom&amp;utm_medium=vidacha&amp;utm_campaign=sf_helper&amp;utm_content=all-promo" class="ga_track_events bold" target="_blank" data-ga-event="send;event;vidacha;helper-promo-click;all">ekstensi bantuan SaveFrom.net</a> untuk mengunduh dari <b>all popular websites</b> dengan&nbsp;1&nbsp;klik.
+      </div>
+    </div>
+  </div>

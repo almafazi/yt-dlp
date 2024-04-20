@@ -15,11 +15,15 @@ import json
 from utils.utils import is_instagram_url, is_tiktok_link, is_youtube_link
 from extractor.tiktok import extract as extract_tiktok
 from extractor.youtube import extract as extract_youtube
+from extractor.instagram import extract as extract_instagram
 
 app = FastAPI()
 
 from downloader.tiktok import router as tiktok_downloader_router 
 app.include_router(tiktok_downloader_router)  
+
+from downloader.instagram import router as instagram_downloader_router 
+app.include_router(instagram_downloader_router)  
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,7 +40,7 @@ async def fetch(url: str):
 
     if is_instagram_url(url):
         try:
-            jsonResponse = instagram.extract(url)  
+            jsonResponse = extract_instagram(url)  
             return JSONResponse(content=jsonResponse)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
