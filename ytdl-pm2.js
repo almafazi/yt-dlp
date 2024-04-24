@@ -354,10 +354,12 @@ require('dotenv').config()
 
             process.stderr.on('data', (data) => {
                 console.error(`Process error: ${data}`);
+                job.log(data);
               //  reject(new Error(`Process error: ${data}`));
             });
 
             process.on('uncaughtException', (err, origin) => {
+                job.log(data);
                 console.error(`Process errorun: ${data}`);
 
             });
