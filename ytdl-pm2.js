@@ -359,8 +359,8 @@ require('dotenv').config()
             });
 
             process.on('uncaughtException', (err, origin) => {
-                job.log(data);
-                console.error(`Process errorun: ${data}`);
+                job.log(err);
+                console.error(`Process errorun: ${err}`);
 
             });
         });
