@@ -293,7 +293,7 @@ require('dotenv').config()
                 '--embed-thumbnail', // Add this line to enable adding album art
                 '--max-filesize', '100M',
                 '-o', outputPath,
-                '--proxy', proxyUrl, // Add this line to set the proxy
+                '--geo-verification-proxy', proxyUrl, // Add this line to set the proxy
                 youtubeUrl
             ]);
 
