@@ -1,0 +1,55 @@
+<div class="media-result">
+    <div class="result-box video" data-hid="tiktok.com" style="">
+      <div class="thumb-box thumb-272 ">
+        <a href="#" class="clip" data-player-id="video_player_1712268378061_3591">
+          <img src="{{ video_data.thumbnail }}" class="thumb">
+          <span class="play-btn"></span>
+        </a>
+      </div>
+      <div class="info-box">
+        
+        <div class="meta">
+          <div class="row title" title="{{ video_data.title }}">{{ video_data.title }}</div>
+          {% if video_data.duration %}
+            <div class="row duration" title="">
+              {{ formatDuration(video_data.duration) }}
+            </div>
+           {% endif %}
+        </div>
+          <table style="width: 100%;">
+          <thead>
+              <tr>
+                <td>File Type</td>
+              <td>Action</td>
+          </tr></thead>
+          <tbody>
+            {% for videoLink in videoLinks %}
+            <tr>
+                <td>
+                    {{ videoLink.format_id | upper }}
+                </td>
+                <td>
+                    <div class="def-btn-box">
+                        <a 
+                        target="_blank"
+                        title="{{ video_data.title }}.{{ videoLink.video_ext }}"
+                        download="{{ video_data.title }}.{{ videoLink.video_ext }}"
+                        data-quality="{{ videoLink.height }}"
+                        data-type="{{ videoLink.ext }}"
+                        class="link link-download subname download-icon" 
+                        href="{{ downloadBaseUrl }}?link={{ encrypt(videoLink.url) }}&title={{ video_data.title }}"
+                        >Download</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+      </div>
+    </div>
+    <div class=" sf-helper extra" data-href="/user.php?vid=312&amp;utm_source=savefrom&amp;utm_medium=vidacha&amp;utm_campaign=sf_helper&amp;utm_content=all-promo" data-ga-event="send;event;vidacha;helper-promo-click;all" style="">
+      <div class="center">
+        <img src="../assets/build/img/extension/icon_32.png" alt="">&nbsp; Kami menyarankan Anda memasang <a href="/user.php?vid=312&amp;utm_source=savefrom&amp;utm_medium=vidacha&amp;utm_campaign=sf_helper&amp;utm_content=all-promo" class="ga_track_events bold" target="_blank" data-ga-event="send;event;vidacha;helper-promo-click;all">ekstensi bantuan SaveFrom.net</a> untuk mengunduh dari <b>all popular websites</b> dengan&nbsp;1&nbsp;klik.
+      </div>
+    </div>
+  </div>

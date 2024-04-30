@@ -12,10 +12,11 @@ if parent_dir not in sys.path:
 
 import yt_dlp
 import json
-from utils.utils import is_instagram_url, is_tiktok_link, is_youtube_link
+from utils.utils import is_instagram_url, is_tiktok_link, is_youtube_link, is_facebook_link
 from extractor.tiktok import extract as extract_tiktok
 from extractor.youtube import extract as extract_youtube
 from extractor.instagram import extract as extract_instagram
+from extractor.facebook import extract as extract_facebook
 
 app = FastAPI()
 
@@ -24,6 +25,9 @@ app.include_router(tiktok_downloader_router)
 
 from downloader.instagram import router as instagram_downloader_router 
 app.include_router(instagram_downloader_router)  
+
+from downloader.fb import router as facebook_downloader_router 
+app.include_router(facebook_downloader_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,6 +59,13 @@ async def fetch(url: str):
     if is_youtube_link(url):
         try:
             jsonResponse = extract_youtube(url)  
+            return JSONResponse(content=jsonResponse)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    if is_facebook_link(url):
+        try:
+            jsonResponse = extract_facebook(url)  
             return JSONResponse(content=jsonResponse)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

@@ -27,3 +27,7 @@ def is_youtube_link(url: str) -> (bool):
     else:
         # Return a tuple indicating it's not a YouTube URL and no video ID
         return False
+
+def is_facebook_link(link):
+    pattern = r"^(?:https?:\/\/(?:www\.)?facebook\.com\/watch\/\?v=\d+|https?:\/\/fb\.watch\/\d+)$"
+    return bool(re.match(pattern, link))
