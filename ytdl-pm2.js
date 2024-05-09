@@ -20,7 +20,6 @@ require('dotenv').config()
 
     const MAX_PROCCESS = parseInt(process.env.MAX_PROCCESS) || 1;
 
-    console.log(process.env.REDIS_PASSWORD)
     const client = new Redis({
         host: 'localhost',
         port: 6379,
