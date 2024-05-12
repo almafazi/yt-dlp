@@ -31,3 +31,11 @@ def is_youtube_link(url: str) -> (bool):
 def is_facebook_link(link):
     pattern = r"^(?:https?:\/\/(?:www\.)?facebook\.com\/watch\/\?v=\d+|https?:\/\/fb\.watch\/\d+)$"
     return bool(re.match(pattern, link))
+
+def is_x_url(url: str) -> bool:
+    # Regular expression pattern for Twitter and x.com URLs.
+    pattern = r'(?:https?:)?\/\/(?:[A-z]+\.)?(twitter\.com|x\.com)\/(?:@)?(?P<username>[A-z0-9_]+)\/status\/(?P<tweet_id>[0-9]+)\/?'
+
+    # Use the re module to compile the regular expression and match the URL.
+    return bool(re.match(pattern, url))
+

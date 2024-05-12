@@ -12,11 +12,12 @@ if parent_dir not in sys.path:
 
 import yt_dlp
 import json
-from utils.utils import is_instagram_url, is_tiktok_link, is_youtube_link, is_facebook_link
+from utils.utils import is_instagram_url, is_tiktok_link, is_youtube_link, is_facebook_link, is_x_url
 from extractor.tiktok import extract as extract_tiktok
 from extractor.youtube import extract as extract_youtube
 from extractor.instagram import extract as extract_instagram
 from extractor.facebook import extract as extract_facebook
+from extractor.x import extract as extract_x
 
 app = FastAPI()
 
@@ -66,6 +67,14 @@ async def fetch(url: str):
     if is_facebook_link(url):
         try:
             jsonResponse = extract_facebook(url)  
+            return JSONResponse(content=jsonResponse)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+
+    if is_x_url(url):
+        try:
+            jsonResponse = extract_x(url)  
             return JSONResponse(content=jsonResponse)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
