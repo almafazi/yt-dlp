@@ -45,19 +45,18 @@ class TikTokBaseIE(InfoExtractor):
         # "app id": aweme = 1128, trill = 1180, musical_ly = 1233, universal = 0
         'aid': '0',
     }
-    _KNOWN_APP_INFO = [
-        '7351144126450059040',
-        '7351149742343391009',
-        '7351153174894626592',
-    ]
     _APP_INFO_POOL = None
     _APP_INFO = None
     _APP_USER_AGENT = None
 
     @property
+    def _KNOWN_APP_INFO(self):
+        return self._configuration_arg('app_info', ie_key=TikTokIE)
+
+    @property
     def _API_HOSTNAME(self):
         return self._configuration_arg(
-            'api_hostname', ['api22-normal-c-useast2a.tiktokv.com'], ie_key=TikTokIE)[0]
+            'api_hostname', ['api16-normal-c-useast1a.tiktokv.com'], ie_key=TikTokIE)[0]
 
     def _isAPIDown():
         return False
@@ -69,13 +68,10 @@ class TikTokBaseIE(InfoExtractor):
                 for key, default in self._APP_INFO_DEFAULTS.items()
                 if key != 'iid'
             }
-            app_info_list = (
-                self._configuration_arg('app_info', ie_key=TikTokIE)
-                or random.sample(self._KNOWN_APP_INFO, len(self._KNOWN_APP_INFO)))
             self._APP_INFO_POOL = [
                 {**defaults, **dict(
                     (k, v) for k, v in zip(self._APP_INFO_DEFAULTS, app_info.split('/')) if v
-                )} for app_info in app_info_list
+                )} for app_info in self._KNOWN_APP_INFO
             ]
 
         if not self._APP_INFO_POOL:
@@ -794,7 +790,8 @@ class TikTokIE(TikTokBaseIE):
 
     def _real_extract(self, url):
         video_id, user_id = self._match_valid_url(url).group('id', 'user_id')
-        if not TikTokBaseIE._isAPIDown():
+        
+        if self._KNOWN_APP_INFO and not TikTokBaseIE._isAPIDown():
             try:
                 return self._extract_aweme_app(video_id)
             except ExtractorError as e:
