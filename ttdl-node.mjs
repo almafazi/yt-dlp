@@ -3,28 +3,10 @@ import Redis from 'ioredis';
 import { exec as execCb } from 'child_process';
 import { promisify } from 'util';
 import { renderFile as render_template } from 'ejs';
-import cluster from 'cluster';
-import os from 'os';
 import cors from '@fastify/cors'
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
-
-if (cluster.isPrimary) {
-    const numWorkers = os.cpus().length;
-
-    console.log(`Master ${process.pid} is running`);
-
-    for (let i = 0; i < numWorkers; i++) {
-        cluster.fork();
-    }
-
-    cluster.on('exit', (worker, code, signal) => {
-        console.log(`Worker ${worker.process.pid} died`);
-        console.log('Forking a new worker...');
-        cluster.fork();
-    });
-} else {
 
 const exec = promisify(execCb);
 
@@ -209,7 +191,4 @@ app.listen({'port': 3013}, (err) => {
         console.error(err);
         process.exit(1);
     }
-    console.log('Server is running on port 3013');
 });
-
-}
