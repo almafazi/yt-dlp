@@ -13,7 +13,7 @@ const limiter = rateLimit({
     max: 10, // 2 requests per minute
 });
 
-app.set('trust proxy', true);
+// app.set('trust proxy', true);
 
 function removeSymbolsAndStrangeLetters(str) {
     // Remove symbols
@@ -30,9 +30,9 @@ app.use(limiter);
 app.get('/directdownload', async (req, res) => {
     const encryptedUrl = req.query.link || req.query.musiclink || req.query.imglink; // Assuming the URL is passed as a query parameter
     const name = req.query.author; // Assuming the name is passed as a query parameter
-    const format_id = req.query.format_id;
-    const source = req.query.source;
-    const slide = req.query.slide;
+    const format_id = req.query.format_id || '';
+    const source = req.query.source || '';
+    const type = req.query.type;
     
     let ext;
     if (req.query.musiclink) {
@@ -58,7 +58,7 @@ app.get('/directdownload', async (req, res) => {
 
     try {
 
-        if(slide) {
+        if(type == 'slide') {
             const stream = got.stream(decryptedUrl);
 
             stream.on('response', (responseStream) => {
@@ -141,8 +141,6 @@ app.get('/download', (req, res) => {
     } else if(imglink) {
         const filename = `${process.env.FILENAME_PREFIX}${author.trim()} ${formattedDate}`;
         const url = decrypt(imglink);
-        console.log(imglink)
-    
         res.setHeader('Content-Type', 'image/jpeg');
         res.setHeader('Content-Transfer-Encoding', 'Binary');
         res.setHeader('Content-Disposition', 'attachment; filename='+removeSymbolsAndStrangeLetters(filename)+'.jpeg');
