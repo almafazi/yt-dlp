@@ -124,30 +124,43 @@ async function responseParser(info, download_url, webpage_download_url) {
         const sorted_formats = filtered_formats.sort((a, b) => (b.width * b.height) - (a.width * a.height));
         const selected_format = sorted_formats[0] || null;
         let wm_video_url = selected_format ? selected_format.url : null;
+        let wm_format_id = selected_format ? selected_format.format_id : null;
         if (!wm_video_url) {
             wm_video_url = formats[0].url;
+            wm_format_id = formats[0].format_id;
         }
 
         const sortedFormats = formats.sort((a, b) => (b.width * b.height) - (a.width * a.height));
 
         const nwm_format = sortedFormats.find(f => !f?.format_note?.includes("watermarked"));
         const nwm_video_url = nwm_format ? nwm_format.url : null;
+        const nwm_format_id = nwm_format ? nwm_format.format_id : null;
         if (!nwm_video_url) {
             nwm_video_url = formats[0].url;
+            nwm_format_id = formats[0].format_id;
         }
 
+        //kalo udah ga perlu cookies//
+        // const download_data = {
+        //         wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&author=" + info.creator,
+        //         nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64') + "&author=" + info.creator,
+        //         audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&author=" + info.creator
+        //     };
+        //kalo udah ga perlu cookies//
         const download_data = {
-                wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&author=" + info.creator,
-                nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64') + "&author=" + info.creator,
+                wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&format_id="+Buffer.from(wm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64')+"&author=" + info.creator,
+                nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64')+"&format_id="+Buffer.from(nwm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64') + "&author=" + info.creator,
                 audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&author=" + info.creator
             };
+
+console.log(download_data);
         return { info, download_data };
     }
 }
 async function extractInfo(url) {
     try {
         const proxy = '--proxy http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
-        const { stdout, stderr } = await exec(`./yt-dlp.sh --extractor-args "tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_info=7355728856979392262" --no-warnings --no-check-certificates --skip-download --dump-json --quiet ${proxy} ${url}`);
+        const { stdout, stderr } = await exec(`./yt-dlp.sh --no-warnings --no-check-certificates --skip-download --dump-json --quiet ${url}`);
         return { stdout, stderr };
     } catch (error) {
         throw error;

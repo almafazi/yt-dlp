@@ -30,6 +30,8 @@ app.use(limiter);
 app.get('/directdownload', async (req, res) => {
     const encryptedUrl = req.query.link || req.query.musiclink || req.query.imglink; // Assuming the URL is passed as a query parameter
     const name = req.query.author; // Assuming the name is passed as a query parameter
+    const format_id = req.query.format_id;
+    const source = req.query.source;
     
     let ext;
     if (req.query.musiclink) {
@@ -42,35 +44,45 @@ app.get('/directdownload', async (req, res) => {
         return res.status(400).send('error');
     }
 
-    if (!encryptedUrl || !name) {
+    if (!encryptedUrl || !name || !format_id || !source) {
         return res.status(400).send('Missing url or name parameter');
     }
 
     // Decrypt the URL (assuming it's base64 encoded)
     const decryptedUrl = Buffer.from(encryptedUrl, 'base64').toString('utf8');
-
+    const sourceUrl = Buffer.from(source, 'base64').toString('utf8');
+    const format_id_decrypt = Buffer.from(format_id, 'base64').toString('utf8');
     // Generate the filename
     const filename = `${removeSymbolsAndStrangeLetters(name.trim())} ${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-')}-${crypto.randomBytes(6).toString('hex')}${ext}`;
 
     try {
+        const ytDlp = spawn('./yt-dlp.sh', ['-f', format_id_decrypt, '-o', '-', sourceUrl]);
+    
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Transfer-Encoding', 'Binary');
+        res.setHeader('Content-Disposition', 'attachment; filename='+removeSymbolsAndStrangeLetters(filename)+'.mp4');
+        ytDlp.stdout.pipe(res);
+        ytDlp.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+        });
         // Stream the response from the request directly to the client
-        const stream = got.stream(decryptedUrl);
+        // const stream = got.stream(decryptedUrl);
 
-        // Set headers based on the response from the got stream
-        stream.on('response', (responseStream) => {
-            res.setHeader('Content-Length', responseStream.headers['content-length']);
-            res.setHeader('Content-Transfer-Encoding', 'Binary');
-            res.setHeader('Content-Type', 'application/octet-stream');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        });
+        // // Set headers based on the response from the got stream
+        // stream.on('response', (responseStream) => {
+        //     res.setHeader('Content-Length', responseStream.headers['content-length']);
+        //     res.setHeader('Content-Transfer-Encoding', 'Binary');
+        //     res.setHeader('Content-Type', 'application/octet-stream');
+        //     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        // });
 
-        // Pipe the download stream to the response
-        stream.pipe(res);
+        // // Pipe the download stream to the response
+        // stream.pipe(res);
 
-        stream.on('error', (error) => {
-            console.error(error);
-            res.status(500).send('An error occurred while processing your request.');
-        });
+        // stream.on('error', (error) => {
+        //     console.error(error);
+        //     res.status(500).send('An error occurred while processing your request.');
+        // });
     } catch (error) {
         console.error(error);
         res.status(500).send('An error occurred while processing your request.');
