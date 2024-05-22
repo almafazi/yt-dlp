@@ -101,9 +101,9 @@ async function responseParser(info, download_url, webpage_download_url) {
         });
 
         const download_data = {
-            wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&author=" + info.creator,
-            nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64') + "&author=" + info.creator,
-            audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&author=" + info.creator
+            wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&type=slide&author=" + info.creator,
+            nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64') + "&type=slide&author=" + info.creator,
+            audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&type=slide&author=" + info.creator
         };
 
         return { info, download_data, photos: mappedPhotos };
