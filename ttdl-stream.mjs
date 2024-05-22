@@ -54,7 +54,7 @@ app.get('/directdownload', async (req, res) => {
     const sourceUrl = Buffer.from(source, 'base64').toString('utf8');
     const format_id_decrypt = Buffer.from(format_id, 'base64').toString('utf8');
     // Generate the filename
-    const filename = `${removeSymbolsAndStrangeLetters(name.trim())} ${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-')}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+    const filename = `${process.env.FILENAME_PREFIX}${removeSymbolsAndStrangeLetters(name.trim())} ${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-')}-${crypto.randomBytes(6).toString('hex')}`;
 
     try {
 
