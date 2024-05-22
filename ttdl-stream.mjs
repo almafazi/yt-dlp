@@ -78,7 +78,7 @@ app.get('/directdownload', async (req, res) => {
     
             res.setHeader('Content-Type', 'video/mp4');
             res.setHeader('Content-Transfer-Encoding', 'Binary');
-            res.setHeader('Content-Disposition', 'attachment; filename='+removeSymbolsAndStrangeLetters(filename)+'.mp4');
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
             ytDlp.stdout.pipe(res);
             ytDlp.stderr.on('data', (data) => {
                 console.error(`stderr: ${data}`);
