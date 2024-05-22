@@ -109,7 +109,7 @@ async function responseParser(info, download_url, webpage_download_url) {
         return { info, download_data, photos: mappedPhotos };
     } else {
 
-        const filtered_formats = formats.filter(f => f?.format_note?.includes("watermarked"));
+        const filtered_formats = formats.filter(f => f?.format_note?.includes("watermarked") && f?.ext?.includes("mp4"));
 
         if(filtered_formats.length == 0) {
             const download_data = {
@@ -132,7 +132,7 @@ async function responseParser(info, download_url, webpage_download_url) {
 
         const sortedFormats = formats.sort((a, b) => (b.width * b.height) - (a.width * a.height));
 
-        const nwm_format = sortedFormats.find(f => !f?.format_note?.includes("watermarked"));
+        const nwm_format = sortedFormats.find(f => !f?.format_note?.includes("watermarked") && f?.ext?.includes("mp4"));
         const nwm_video_url = nwm_format ? nwm_format.url : null;
         const nwm_format_id = nwm_format ? nwm_format.format_id : null;
         if (!nwm_video_url) {
@@ -150,10 +150,9 @@ async function responseParser(info, download_url, webpage_download_url) {
         const download_data = {
                 wm_video_url: download_url + "?link=nolink&format_id="+Buffer.from(wm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64')+"&author=" + info.creator,
                 nwm_video_url: download_url + "?link=nolink&format_id="+Buffer.from(nwm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64') + "&author=" + info.creator,
-                audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&author=" + info.creator
-            };
+                audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&format_id="+Buffer.from(wm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64')+"&author=" + info.creator
+        };
 
-console.log(download_data);
         return { info, download_data };
     }
 }

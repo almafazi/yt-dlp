@@ -44,7 +44,7 @@ app.get('/directdownload', async (req, res) => {
         return res.status(400).send('error');
     }
 
-    if (!encryptedUrl || !name || !format_id || !source) {
+    if (!encryptedUrl || !name) {
         return res.status(400).send('Missing url or name parameter');
     }
 
