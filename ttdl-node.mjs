@@ -148,8 +148,8 @@ async function responseParser(info, download_url, webpage_download_url) {
         //     };
         //kalo udah ga perlu cookies//
         const download_data = {
-                wm_video_url: download_url + "?link=" + Buffer.from(wm_video_url).toString('base64') + "&format_id="+Buffer.from(wm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64')+"&author=" + info.creator,
-                nwm_video_url: download_url + "?link=" + Buffer.from(nwm_video_url).toString('base64')+"&format_id="+Buffer.from(nwm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64') + "&author=" + info.creator,
+                wm_video_url: download_url + "?link=nolink&format_id="+Buffer.from(wm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64')+"&author=" + info.creator,
+                nwm_video_url: download_url + "?link=nolink&format_id="+Buffer.from(nwm_format_id).toString('base64')+"&source="+Buffer.from(info?.webpage_url).toString('base64') + "&author=" + info.creator,
                 audio_url: download_url + "?musiclink=" + Buffer.from(audio.uri).toString('base64') + "&author=" + info.creator
             };
 
