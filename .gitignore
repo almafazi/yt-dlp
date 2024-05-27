@@ -70,7 +70,7 @@ converted/*
 # Python
 *.pyc
 *.pyo
-.pytest_cache
+.*_cache
 wine-py2exe/
 py2exe.log
 build/
