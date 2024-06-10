@@ -283,7 +283,7 @@ require('dotenv').config()
 
     async function convertToMp3(youtubeUrl, outputPath, job) {
         return new Promise((resolve, reject) => {
-            const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
+            // const proxyUrl = 'http://hwbknjxk-rotate:wcpjh6lq5loy@p.webshare.io:80';
             const process = spawn('./yt-dlp.sh', [
                 '--break-match-filters', 'duration <= 2000',
                 '-f', 'bestaudio/best',
@@ -293,7 +293,7 @@ require('dotenv').config()
                 '--embed-thumbnail', // Add this line to enable adding album art
                 '--max-filesize', '100M',
                 '-o', outputPath,
-                '--geo-verification-proxy', proxyUrl, // Add this line to set the proxy
+                // '--geo-verification-proxy', proxyUrl, // Add this line to set the proxy
                 youtubeUrl
             ]);
 

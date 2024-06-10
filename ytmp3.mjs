@@ -144,9 +144,7 @@ app.get('/download', (req, res) => {
         });
     }
 
-    const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
-
-    const command = `./yt-dlp.sh -f ${parsedData.id} --no-warning --dump-json --proxy ${proxyUrl} ${parsedData.vid}`;
+    const command = `./yt-dlp.sh -f ${parsedData.id} --no-warning --dump-json ${parsedData.vid}`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
             return res.json({
@@ -227,11 +225,8 @@ app.post('/fetch', (req, res) => {
             return res.json(JSON.parse(result));
         }
 
-        // If 
-        const proxyUrl = 'http://mdjxjxut-rotate:7ffa95jej8l5@p.webshare.io:80';
-
         // Get YouTube video information
-        exec(`./yt-dlp.sh --no-warning --dump-json --proxy ${proxyUrl} ${url}`, (error, stdout, stderr) => {
+        exec(`./yt-dlp.sh --no-warning --dump-json ${url}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
                 return res.status(200).json({
