@@ -65,7 +65,7 @@ require('dotenv').config()
     });
     
     serverAdapter.setBasePath('/bull-queue-2024');
-    app.register(serverAdapter.registerPlugin(), { prefix: '/bull-queue-2024' });
+    app.register(serverAdapter.registerPlugin(), { prefix: '/ytdl/bull-queue-2024' });
 
     app.get('/health', async (request, reply) => {
         try {
@@ -223,6 +223,8 @@ require('dotenv').config()
     app.get('/get-file', async (request, reply) => {
         const { dlink, prefix } = request.query;
 
+
+
         // Check if the token has been used or expired
         const check = await client.get(dlink);
         if (check) {
@@ -239,10 +241,12 @@ require('dotenv').config()
         const filePath = decrypt(dlink);
         const fileName = path.basename(filePath);
 
+        const filePrefix = prefix || process.env.FILENAME_PREFIX || '';
+
         // Send the file
         reply.header('Content-Length', fs.statSync(filePath).size);
         reply.header('Content-Transfer-Encoding', 'binary');
-        return reply.download(filePath, prefix+fileName);
+        return reply.download(filePath, filePrefix+fileName);
     });
 
     app.get('/download/:jobId', async (request, reply) => {
