@@ -54,7 +54,6 @@ converted/*
 *.srt
 *.ssa
 *.swf
-*.swp
 *.tt
 *.ttml
 *.url
@@ -122,6 +121,7 @@ yt-dlp.zip
 .vscode
 *.sublime-*
 *.code-workspace
+*.swp
 
 # Lazy extractors
 */extractor/lazy_extractors.py
