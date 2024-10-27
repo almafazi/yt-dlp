@@ -47,6 +47,7 @@ from ..utils import (
     FormatSorter,
     GeoRestrictedError,
     GeoUtils,
+    ISO639Utils,
     LenientJSONDecoder,
     Popen,
     RegexNotFoundError,
@@ -333,7 +334,7 @@ class InfoExtractor:
     like_count:     Number of positive ratings of the video
     dislike_count:  Number of negative ratings of the video
     repost_count:   Number of reposts of the video
-    average_rating: Average rating give by users, the scale used depends on the webpage
+    average_rating: Average rating given by users, the scale used depends on the webpage
     comment_count:  Number of comments on the video
     comments:       A list of comments, each with one or more of the following
                     properties (all but one of text or html optional):
@@ -520,7 +521,7 @@ class InfoExtractor:
     or _extract_from_webpage as necessary. While these are normally classmethods,
     _extract_from_webpage is allowed to be an instance method.
 
-    _extract_from_webpage may raise self.StopExtraction() to stop further
+    _extract_from_webpage may raise self.StopExtraction to stop further
     processing of the webpage and obtain exclusive rights to it. This is useful
     when the extractor cannot reliably be matched using just the URL,
     e.g. invidious/peertube instances
@@ -3071,7 +3072,11 @@ class InfoExtractor:
             url_pattern = stream.attrib['Url']
             stream_timescale = int_or_none(stream.get('TimeScale')) or timescale
             stream_name = stream.get('Name')
-            stream_language = stream.get('Language', 'und')
+            # IsmFD expects ISO 639 Set 2 language codes (3-character length)
+            # See: https://github.com/yt-dlp/yt-dlp/issues/11356
+            stream_language = stream.get('Language') or 'und'
+            if len(stream_language) != 3:
+                stream_language = ISO639Utils.short2long(stream_language) or 'und'
             for track in stream.findall('QualityLevel'):
                 KNOWN_TAGS = {'255': 'AACL', '65534': 'EC-3'}
                 fourcc = track.get('FourCC') or KNOWN_TAGS.get(track.get('AudioTag'))
