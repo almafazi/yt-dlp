@@ -20,6 +20,7 @@ import hmac
 
 env = Environment(loader=FileSystemLoader('html'))
 load_dotenv()
+layout = os.getenv('LAYOUT')
 
 # Access environment variables
 downloadbaseurl = os.getenv('DOWNLOAD_BASE_URL_FB')
@@ -29,6 +30,15 @@ key = hashlib.sha256(b"mysecretkey").digest()
 # Ensure the key is URL-safe base64 encoded
 encoded_key = base64.urlsafe_b64encode(key)
 cipher_suite = Fernet(encoded_key)
+
+def nFormatter(num):
+    if not num:
+        return "0"
+    magnitude = 0
+    while abs(num) >= 1000:
+        magnitude += 1
+        num /= 1000.0
+    return "%.2f%s" % (num, ["", "K", "M", "G", "T", "P"][magnitude])
 
 def encrypt(string: str):
     encrypted_string = cipher_suite.encrypt(string.encode())
@@ -66,11 +76,13 @@ def extract(url):
     except subprocess.CalledProcessError as e:
         raise Exception(f"Failed to run yt_dlp with error: {e.stderr}")
                 
-    template = env.get_template('facebook.html')
+    print(layout)
+    template = env.get_template(f'{layout}facebook.html')
     html_content = template.render(
         video_data=videoData, 
         formatDuration=format_duration, 
         encrypt=encrypt,
+        nFormatter=nFormatter,
         urlencode=urlencode,
         div=div,
         videoLinks=get_video_link(videoData),

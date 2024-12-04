@@ -23,6 +23,7 @@ load_dotenv()
 
 # Access environment variables
 downloadbaseurl = os.getenv('DOWNLOAD_BASE_URL_FB')
+layout = os.getenv('LAYOUT')
 yt_dlp_main_path = Path(__file__).resolve().parent.parent.parent / 'yt_dlp' / '__main__.py'
 
 key = hashlib.sha256(b"mysecretkey").digest()
@@ -65,6 +66,15 @@ def div(a, b):
 def urlencode(str):
     return quote(str)
 
+def nFormatter(num):
+    if not num:
+        return "0"
+    magnitude = 0
+    while abs(num) >= 1000:
+        magnitude += 1
+        num /= 1000.0
+    return "%.2f%s" % (num, ["", "K", "M", "G", "T", "P"][magnitude])
+
 def format_duration(d):
     seconds = int(d)
     minutes, seconds = divmod(seconds, 60)
@@ -84,10 +94,11 @@ def extract(url):
     except subprocess.CalledProcessError as e:
         raise Exception(f"Failed to run yt_dlp with error: {e.stderr}")
                 
-    template = env.get_template('x.html')
+    template = env.get_template(f'{layout}x.html')
     html_content = template.render(
         video_data=videoData, 
         formatDuration=format_duration, 
+        nFormatter=nFormatter,
         encrypt=encrypt,
         urlencode=urlencode,
         div=div,

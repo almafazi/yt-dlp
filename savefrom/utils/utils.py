@@ -28,9 +28,14 @@ def is_youtube_link(url: str) -> (bool):
         # Return a tuple indicating it's not a YouTube URL and no video ID
         return False
 
-def is_facebook_link(link):
-    pattern = r"^(?:https?:\/\/(?:www\.)?facebook\.com\/watch\/\?v=\d+|https?:\/\/fb\.watch\/\d+)$"
-    return bool(re.match(pattern, link))
+def is_facebook_link(url):
+    fb_video_patterns = [
+        r'https?://(www\.)?facebook\.com/.*/videos/.*',
+        r'https?://(www\.)?facebook\.com/watch\?v=.*',
+        r'https?://fb\.watch/.*'
+    ]
+    
+    return any(re.match(pattern, url) for pattern in fb_video_patterns)
 
 def is_x_url(url: str) -> bool:
     # Regular expression pattern for Twitter and x.com URLs.
